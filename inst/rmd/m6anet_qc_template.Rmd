@@ -1,0 +1,218 @@
+---
+title: "m6Anet QC Summary"
+output: html_document
+params:
+  data.site_proba_df: NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+```
+
+
+### QC Summary of Detected and High-Confidence m6A Sites
+```{r, echo=FALSE,message=FALSE}
+# Total Detected Sites, Transcripts, and Genes
+total_gene <- params$data.site_proba_df %>%
+  dplyr::distinct(ensembl_gene_name) %>%
+  nrow()
+
+total_tx <- params$data.site_proba_df %>%
+  dplyr::distinct(ensembl_transcript_name) %>%
+  nrow()
+
+total_sites <- nrow(params$data.site_proba_df)
+
+# Total High Confidence (probability_modified >= 0.9) Sites, Transcripts, and Genes
+high_conf_data <- params$data.site_proba_df %>%
+  dplyr::filter(probability_modified >= 0.9)
+
+high_conf_sites <- nrow(high_conf_data)
+
+high_conf_tx <- high_conf_data %>%
+  dplyr::distinct(ensembl_transcript_name) %>%
+  nrow()
+
+high_conf_gene <- high_conf_data %>%
+  dplyr::distinct(ensembl_gene_name) %>%
+  nrow()
+
+# Create Summary Data Frame
+qc_summary <- data.frame(
+  Category = c("Total Sites", "Total Transcripts", "Total Genes",
+               "High-Confidence (>.90) Sites", "High-Confidence (>.90) Transcripts", "High-Confidence (>.90) Genes"),
+  Count = c(total_sites, total_tx, total_gene,
+            high_conf_sites, high_conf_tx, high_conf_gene)
+)
+
+knitr::kable(qc_summary)
+```
+
+
+### Binned Distribution of m6A Sites per Transcript
+```{r, echo=FALSE,message=FALSE}
+# Count number of sites per transcript
+sites_per_tx <- high_conf_data %>%
+  group_by(ensembl_transcript_name) %>%
+  summarize(n_sites = n()) %>%
+  ungroup()
+
+# Summarize the number of transcripts per bin
+binned_summary <- sites_per_tx %>%
+  group_by(n_sites) %>%
+  summarize(n_tx = n(), .groups = "drop") %>%
+  arrange(n_sites)
+
+knitr::kable(binned_summary, 
+             col.names = c("# of Sites per Transcript", "# of Transcripts"),
+             align = c('l', 'r'))
+
+ggplot(binned_summary, aes(x = n_sites, y = n_tx)) + 
+  geom_bar(stat = "identity", fill = "cadetblue") +
+  ggtitle("Distribution of High Confidence m6A Sites per Transcript") +
+  xlab("Number of m6A Sites") +
+  ylab("Number of Transcripts") +
+  theme_light()
+
+```
+
+
+### Distribution of High Confidence m6A Transcripts per Gene
+```{r, echo=FALSE,message=FALSE}
+tx_per_gene <- high_conf_data %>% 
+  group_by(ensembl_gene_name, ensembl_transcript_id) %>% 
+  summarize(n_sites = n()) %>% 
+  ungroup() # summarize per transcript
+
+tx_per_gene <- tx_per_gene %>% 
+  group_by(ensembl_gene_name) %>% 
+  summarize(n_tx = n()) # summarize per number of transcripts per gene
+
+tx_per_gene <- tx_per_gene %>% 
+  group_by(n_tx) %>% 
+  summarize(n=n())
+
+# Table with binned sites per transcript
+knitr::kable(tx_per_gene,
+  col.names = c("# of m6A Transcripts per Gene", "# of Genes"),
+  align = c('l', 'r')
+)
+
+# Output Transcripts with the most amount of sites
+
+ggplot(tx_per_gene, aes(x = n_tx, y = n)) + 
+  geom_bar(stat = "identity", fill = "lightsalmon1") +
+  ggtitle("Distribution of High Confidence m6A Transcripts per Gene") +
+  xlab("Number of m6A Transcripts") +
+  ylab("Number of Genes") +
+  theme_light()
+
+```
+
+
+### Biotype Distribution
+```{r, echo=FALSE, message=FALSE}
+tx_biotype <- high_conf_data %>%
+  group_by(ensembl_transcript_id, gene_biotype) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(gene_biotype) %>%
+  summarize(n = n()) %>%
+  mutate(percentage = (n / sum(n)) * 100)
+
+knitr::kable(
+  tx_biotype,
+  col.names = c("Transcript Biotype", "Number of Transcripts", "Percentage")
+)
+
+# Create main pie chart df (with rare biotypes as "Other")
+biotype_main <- tx_biotype %>%
+  mutate(gene_biotype = ifelse(percentage < 1, "Other", gene_biotype)) %>%
+  group_by(gene_biotype) %>%
+  summarize(n = sum(n)) %>%
+  mutate(percentage = (n / sum(n)) * 100)
+
+# Other/Rare df (percentage < 1)
+biotype_rare <- tx_biotype %>% filter(percentage < 1)
+
+# Main pie chart with "Other"
+ggplot(biotype_main, aes(x = "", y = percentage, fill = gene_biotype)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  scale_fill_brewer(palette="Set3") +
+  labs(title = "Transcript Biotype Distribution (with 'Other')") +
+  theme_void()
+
+# Pie chart for breakdown of "Other"
+ggplot(biotype_rare, aes(x = "", y = percentage, fill = gene_biotype)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  scale_fill_brewer(palette="Set3") +
+  labs(title = "Breakdown of 'Other' Transcript Biotypes (<1%)") +
+  theme_void()
+```
+
+### KMER Distribution
+```{r, echo=FALSE,message=FALSE, includ=FALSE}
+kmer <- high_conf_data %>%
+  group_by(kmer) %>%
+  summarize(n_sites = n()) %>%
+  mutate(percentage = (n_sites / sum(n_sites)) * 100) %>% 
+  arrange(desc(percentage))
+
+knitr::kable(
+  kmer,
+  col.names = c("kmer", "Number of sites", "Percentage"),
+  align = c('l', 'r')
+)
+
+ggplot(kmer, aes(x = kmer, y = percentage)) + 
+  geom_bar(stat = "identity", fill = "violet") +
+  ggtitle("Kmer Distribution across m6A Sites ") +
+  xlab("kmer") +
+  ylab("Frequency") +
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme_light()
+```
+
+
+### High Confidence m6A Transcript Length Distribution
+```{r, echo=FALSE}
+# Extract unique transcripts from filtered data
+tx_length <- high_conf_data %>%
+  distinct(ensembl_transcript_id, transcript_length)
+
+# Bin into ranges 
+tx_length <- tx_length %>%
+  mutate(length_bin = cut(transcript_length,
+                        breaks = c(0, 100, 500, 1000, 5000, 10000, Inf),
+                        labels = c("0-100", "101-500", "501-1000", "1001-5000", "5001-10000", ">10000"),
+                        right = TRUE, include.lowest = TRUE))
+
+# Summarize the number of transcripts in each bin
+tx_length_summary <- tx_length %>%
+  group_by(length_bin) %>%
+  summarize(n_tx = n(), .groups = "drop") %>%
+  arrange(length_bin)
+
+knitr::kable(tx_length_summary, 
+             col.names = c("Length bin", "# of Transcripts"))
+
+# Density Plot
+ggplot(tx_length, aes(x = transcript_length)) +
+  geom_density(fill = "deepskyblue3", alpha = 0.6) +
+  ggtitle("Density Plot of Transcript Lengths") +
+  xlab("Transcript Length (nt)") +
+  ylab("Density") +
+  theme_light()
+```
+
+
+
+
+
+
+

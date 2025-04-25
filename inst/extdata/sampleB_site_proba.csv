@@ -1,0 +1,7 @@
+"ensembl_transcript_id","ensembl_transcript_id.1","ensembl_gene_id","ensembl_gene_name","gene_biotype","transcript_length","transcript_position","n_reads","kmer","probability_modified","mod_ratio"
+"ENST00000000412.8","M6PR-201","ENSG00000003056.8","M6PR","protein_coding",2450,2130,203,"GGACT",0.981747568,0.655172414
+"ENST00000000412.8","M6PR-201","ENSG00000003056.8","M6PR","protein_coding",2450,2270,NA,"GGACT",NA,NA
+"ENST00000085068.7","ISOC2-201","ENSG00000063241.8","ISOC2","protein_coding",1122,980,193,"AGACT",0.927476168,0.85492228
+"ENST00000156825.5","MBD3-201","ENSG00000071655.18","MBD3","protein_coding",5518,1911,227,"GGACT",0.975045145,0.881057269
+"ENST00000156825.5","MBD3-201","ENSG00000071655.18","MBD3","protein_coding",5518,2082,297,"GGACT",0.927476168,0.65993266
+"ENST00000156825.5","MBD3-201","ENSG00000071655.18","MBD3","protein_coding",5518,2112,316,"GGACT",0.975045145,0.851265823
