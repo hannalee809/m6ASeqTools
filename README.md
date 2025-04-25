@@ -72,6 +72,11 @@ Input a list of vectors containing gene names, transcript ids, or site ids for e
 compare_m6a_distribution(vector)
 ```
 
+Input two dataframes, one for group1 and group2, along with column names for group1 and group2 and the function will return a data frame with the merged columns and a column for log2 fold change.
+```r
+log2fc_weighted_mod_ratio(group1,group2,group1_name="Group 1",group2_name="Group 2")
+```
+
 Input a data frame which must have a column named "log2fc_weighted_mod_ratio", a DESEQ dataframe, multiple column names along with the name of the experimental and control group. The function will return a plot comparing weighted mod ratio with gene expression.
 ```r
 weighted_mod_ratio_and_DGE(log2fc_df, deseq_df, gene_col = "gene_id", log2fc_col = "log2fc", padj_col = "padj", group1_name = "Group1", group2_name = "Group2")
