@@ -8,8 +8,6 @@
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 #' @export
-#' @examples
-#' filtered_sites <- filter_m6a_sites(data.site_proba_df, prob_modified=0.5)
 
 filter_m6a_sites <- function(data.site_proba_df, prob_modified=0.9) {
   filt_data <- data.site_proba_df %>%

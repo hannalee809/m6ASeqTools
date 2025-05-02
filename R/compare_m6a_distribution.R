@@ -9,10 +9,6 @@
 #'
 #' @importFrom utils combn
 #' @export
-#' @examples
-#' gene_list <- list(A = unique(m6a_df_A$ensembl_gene_name), B = unique(m6a_df_B$ensembl_gene_name), C = unique(m6a_df_C$ensembl_gene_name))
-#' gene_comparison <- compare_m6a_distribution(gene_list)
-
 compare_m6a_distribution <- function(named_list) {
   group_names <- names(named_list)
   if (is.null(group_names)) stop("Input list must be named.")

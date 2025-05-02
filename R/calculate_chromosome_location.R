@@ -12,17 +12,6 @@
 #' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal ggsave
 #' @importFrom magrittr %>%
 #' @import org.Hs.eg.db
-#' @examples
-#' # Load example data
-#' df_m6a <- read.csv(system.file("extdata", "sampleA_site_proba.csv", package = "m6ASeqTools"))
-#'
-#' # Run chromosome location summary
-#' df_with_chr <- calculate_chromosome_location(
-#'   df_m6a,
-#'   output_csv = tempfile(fileext = ".csv"),
-#'   output_plot = tempfile(fileext = ".pdf")
-#' )
-#' head(df_with_chr)
 #' @export
 
 calculate_chromosome_location <- function(data.site_proba_df,
