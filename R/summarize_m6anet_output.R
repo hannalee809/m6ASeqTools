@@ -6,8 +6,7 @@
 #' @param data.site_proba_df The 'datadata frame from m6Anet output.
 #' @param output_file Name of the output HTML file.
 #' @return Renders an HTML summary QC report.
-#' @examples
-#' summarize_m6anet_output(data.site_proba_df, "qc_report.html")
+#' @export
 
 
 summarize_m6anet_output <- function(data.site_proba_df, output_file="m6anet_qc_report.html") {

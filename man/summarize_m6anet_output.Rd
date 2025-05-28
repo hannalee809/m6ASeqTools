@@ -21,6 +21,3 @@ Renders an HTML summary QC report.
 This function summarizes the output of m6anet. This results in a html file with plots and
 metrics. You can also put pooled data from m6anet as input.
 }
-\examples{
-summarize_m6anet_output(data.site_proba_df, "qc_report.html")
-}

@@ -16,7 +16,3 @@ to all, pairwise intersections excluding the third (if exactly 3 groups are inpu
 \description{
 Compares common and unique m6A sites, transcripts, or genes for 2 or more groups
 }
-\examples{
-gene_list <- list(A = unique(m6a_df_A$ensembl_gene_name), B = unique(m6a_df_B$ensembl_gene_name), C = unique(m6a_df_C$ensembl_gene_name))
-gene_comparison <- compare_m6a_distribution(gene_list)
-}

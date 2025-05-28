@@ -7,7 +7,7 @@
 calculate_weighted_mod_ratio(data_frame, mod_ratio_column = "mod_ratio")
 }
 \arguments{
-\item{data_frame}{A data frame with m6A site-level data}
+\item{data_frame}{A data frame with m6A site-level data with transcript regions (from \code{get_transcript_region_lengths()})}
 
 \item{mod_ratio_column}{Character string, name of the column with modification ratios (default: "mod_ratio")}
 }
@@ -17,9 +17,4 @@ A data frame with weighted modification ratios per transcript
 \description{
 Calculates the sum of a given modification ratio column for each transcript,
 then normalizes it by transcript length.
-}
-\examples{
-#' # Load example data
-df_m6a <- read.csv(system.file("extdata", "sampleA_site_proba.csv", package = "m6ASeqTools"))
-weighted_mod_ratio <- calculate_weighted_mod_ratio(df_m6a, mod_ratio_column= "mod_ratio")
 }

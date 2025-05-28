@@ -6,7 +6,7 @@
 #' @param group_1_name Name for group 1
 #'  @param group_2_name Name for group 2
 #' @return filtered dataframe of m6A sites
-#' @importFrom dplyr group_by summarize mutate n()
+#' @importFrom dplyr group_by summarize mutate n
 #' @importFrom magrittr %>%
 #' @importFrom rlang sym !!
 #' @export

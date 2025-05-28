@@ -23,6 +23,3 @@ This function calculates the relative transcript regions of the 5' UTR, CDS,
 and 3' UTR for each transcript using the region length df from
 \code{get_transcript_region_lengths()}
 }
-\examples{
-mapped_regions <- map_relative_tx_regions_to_m6A(data.site_proba_df, tx_regions)
-}

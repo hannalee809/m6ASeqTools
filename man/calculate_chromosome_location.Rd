@@ -23,15 +23,3 @@ chr_locations Merged data frame with chromosome info.
 \description{
 Adds chromosome annotation to a data frame of high-confidence m6A sites using \code{org.Hs.eg.db}.
 }
-\examples{
-# Load example data
-df_m6a <- read.csv(system.file("extdata", "sampleA_site_proba.csv", package = "m6ASeqTools"))
-
-# Run chromosome location summary
-df_with_chr <- calculate_chromosome_location(
-  df_m6a,
-  output_csv = tempfile(fileext = ".csv"),
-  output_plot = tempfile(fileext = ".pdf")
-)
-head(df_with_chr)
-}

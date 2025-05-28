@@ -9,7 +9,7 @@ Includes transcript-level summaries, regional distributions, QC report generatio
 
 ```r
 # Install directly from GitHub
-devtools::install_github("YOUR_USERNAME/m6ASeqTools")
+devtools::install_github("hannalee809/m6ASeqTools")
 ```
 
 ---

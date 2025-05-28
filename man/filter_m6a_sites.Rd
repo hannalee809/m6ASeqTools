@@ -17,6 +17,3 @@ filtered dataframe of m6A sites
 \description{
 This function filters m6A sites from m6anet output based on probability_modified criteria.
 }
-\examples{
-filtered_sites <- filter_m6a_sites(data.site_proba_df, prob_modified=0.5)
-}
