@@ -49,7 +49,7 @@ map_relative_tx_regions_to_m6A(m6Aout,tx_regions)
 
 Input the data frame generated from "map_relative_tx_regions_to_m6A" output and a string for the label of the plot and the function will return a plot showing density of m6A sites across the transcript.
 ```r
-plot_rel_positions(df,"")
+plot_rel_positions(df,"label")
 ```
 
 Input the m6a output dataframe and then optional paths to save the csv summary and barplot.
@@ -69,7 +69,13 @@ calculate_weighted_mod_ratio(m6a_df, mod_ratio_column = "mod_ratio")
 
 Input a list of vectors containing gene names, transcript ids, or site ids for every group and the function will return a list of elements unique to each group, pairwise overlaps, elements shared by all groups, and each pair-wise overlap excluding the third group.
 ```r
-compare_m6a_distribution(vector)
+gene_list <- list(
+  sample1 = unique(sample1_m6a$ensembl_gene_name),
+  sample2 = unique(sample2_m6a$ensembl_gene_name),
+  sample3 = unique(sample3_m6a$ensembl_gene_name)
+)
+
+compare_m6a_distribution(gene_list)
 ```
 
 Input two dataframes, one for group1 and group2, along with column names for group1 and group2 and the function will return a data frame with the merged columns and a column for log2 fold change.

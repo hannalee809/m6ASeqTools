@@ -7,7 +7,8 @@
 summarize_weighted_mod_ratio_and_DGE(
   df,
   group1_name = "Group1",
-  group2_name = "Group2"
+  group2_name = "Group2",
+  combine = TRUE
 )
 }
 \arguments{
