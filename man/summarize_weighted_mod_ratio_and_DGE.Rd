@@ -8,6 +8,9 @@ summarize_weighted_mod_ratio_and_DGE(
   df,
   group1_name = "Group1",
   group2_name = "Group2",
+  log2FC_dge,
+  log2fc_wmr,
+  sig_col = "significant",
   combine = TRUE
 )
 }
