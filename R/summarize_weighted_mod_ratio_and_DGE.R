@@ -11,7 +11,7 @@
 #' @importFrom rlang sym !!
 #' @export
 
-summarize_weighted_mod_ratio_and_DGE <- function(df, group1_name = "Group1", group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = significant, combine = TRUE) {
+summarize_weighted_mod_ratio_and_DGE <- function(df, group1_name = "Group1", group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = "significant", combine = TRUE) {
   group_list <- list()
   all_biotype <- list()
   all_region <- list()
