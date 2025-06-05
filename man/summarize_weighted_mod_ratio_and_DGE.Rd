@@ -17,12 +17,22 @@ summarize_weighted_mod_ratio_and_DGE(
 \arguments{
 \item{df}{Output from weighted_mod_ratio_and_DGE}
 
-\item{group_1_name}{Name for group 1
-@param group_2_name Name for group 2}
+\item{group1_name}{Name for group 1}
+
+\item{group2_name}{Name for group 2}
+
+\item{log2FC_dge}{Column name for log2 fold change (DGE)}
+
+\item{log2fc_wmr}{Column name for log2 fold change (weighted mod ratio)}
+
+\item{sig_col}{Column name for significance boolean (e.g., adjusted p < 0.05)}
+
+\item{combine}{Logical; whether to return combined summaries}
 }
 \value{
-filtered dataframe of m6A sites
+A list containing filtered data frames and summaries
 }
 \description{
-This function filters m6A sites from m6anet output based on probability_modified criteria.
+This function groups transcripts into functional categories based on gene expression and m6A methylation changes,
+and summarizes transcript biotype and regional site distributions.
 }
