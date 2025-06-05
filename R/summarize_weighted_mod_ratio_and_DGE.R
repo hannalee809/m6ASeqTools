@@ -11,19 +11,19 @@
 #' @importFrom rlang sym !!
 #' @export
 
-summarize_weighted_mod_ratio_and_DGE <- function(df, group1_name = "Group1", group2_name = "Group2", combine = TRUE) {
+summarize_weighted_mod_ratio_and_DGE <- function(df, group1_name = "Group1", group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = significant, combine = TRUE) {
   group_list <- list()
   all_biotype <- list()
   all_region <- list()
 
   # Define filtering rules for each group
   filters <- list(
-    upreg_hyperm6A_group1        = df[, 22] == TRUE  & df[, 20] > 0 & df[, 19] > 0,
-    upreg_group1_hyperm6a_group2 = df[, 22] == TRUE  & df[, 20] > 0 & df[, 19] < 0,
-    upreg_hyperm6A_group2        = df[, 22] == TRUE  & df[, 20] < 0 & df[, 19] < 0,
-    upreg_group2_hyperm6a_group1 = df[, 22] == TRUE  & df[, 20] < 0 & df[, 19] > 0,
-    noDGE_hyperm6A_group1        = df[, 22] == FALSE & df[, 20] > 0,
-    noDGE_hyperm6A_group2        = df[, 22] == FALSE & df[, 20] < 0
+    upreg_hyperm6A_group1        = sig_col == TRUE  & log2FC_dge > 0 & log2fc_wmr > 0,
+    upreg_group1_hyperm6a_group2 = sig_col == TRUE  & log2FC_dge > 0 & log2fc_wmr < 0,
+    upreg_hyperm6A_group2        = sig_col == TRUE  & log2FC_dge < 0 & log2fc_wmr < 0,
+    upreg_group2_hyperm6a_group1 = sig_col == TRUE  & log2FC_dge < 0 & log2fc_wmr > 0,
+    noDGE_hyperm6A_group1        = sig_col == FALSE & log2fc_wmr > 0,
+    noDGE_hyperm6A_group2        = sig_col == FALSE & log2fc_wmr < 0
   )
 
   for (name in names(filters)) {
