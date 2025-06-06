@@ -87,7 +87,7 @@ Input a data frame which must have a column named "log2fc_weighted_mod_ratio", a
 weighted_mod_ratio_and_DGE(log2fc_df, deseq_df, gene_col = "gene_id", log2fc_col = "log2fc", padj_col = "padj", group1_name = "Group1", group2_name = "Group2")
 ```
 
-Input the data frame generated from "weighted_mod_ratio_and_DGE", the group names, the name of the log2 fold change column from DESEQ, the name of the log2 fold change column from weighted mod ratio, the name of the significance column containing boolean values, and whether you want a combined summary. The function will return 
+Input the data frame generated from "weighted_mod_ratio_and_DGE", the group names, the name of the log2 fold change column from DESEQ, the name of the log2 fold change column from weighted mod ratio, the name of the significance column containing boolean values, and whether you want a combined summary.  
 ```r
 summarize_weighted_mod_ratio_and_DGE(df,group1_name = "Group1",group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = "significant", combine = TRUE)
 ```
