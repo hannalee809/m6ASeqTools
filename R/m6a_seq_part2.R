@@ -47,7 +47,7 @@ m6a_seq_part2 <- function(vec_list,
   on.exit(setwd(old_dir), add = TRUE)
 
   # Optional: Compare m6A distributions
-  if (compare_sites && !is.null(vec_list)) {
+  if (!is.null(vec_list)) {
     comparison <- compare_m6a_distribution(vec_list)
     new_compare <- lapply(comparison, function(x) {
       length(x) <- max(lengths(comparison))
