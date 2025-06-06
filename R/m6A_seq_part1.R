@@ -63,5 +63,5 @@ m6A_seq_part1 <- function(m6Aout,
   write.csv(wmr, paste0("weighted_mod_ratio_", mod_ratio_df, ".csv"), row.names = FALSE)
 
   # Save result to global environment for convenience
-  assign(mod_ratio_df, wmr, envir = .GlobalEnv)
+  assign(paste0("weighted_mod_ratio_", mod_ratio_df), wmr, envir = .GlobalEnv)
 }
