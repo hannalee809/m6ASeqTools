@@ -75,7 +75,7 @@ m6a_seq_part2 <- function(vec_list,
 
   # 4. Summarize biotype + region by expression clusters
     
-  assign(log_column, paste0(group1_name, "_vs_", group2_name, "_log2FC"),envir=.GlobalEnv)
+  assign("log_column", paste0(group1_name, "_vs_", group2_name, "_log2FC"),envir=.GlobalEnv)
   assign("log_wmr","log2fc_weighted_mod_ratio",envir=.GlobalEnv)
   assign("sig_column","significant",envir=.GlobalEnv)
   
