@@ -25,7 +25,7 @@
 #' @return Writes several CSV and PDF files to the output directory and returns
 #'   invisibly
 #' @export
-wmr_and_dge <- function(vec_list,
+m6a_seq_part2 <- function(vec_list,
                         g1_df,
                         g2_df,
                         group1_name = "Group1",
