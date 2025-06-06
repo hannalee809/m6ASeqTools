@@ -92,7 +92,7 @@ Input the data frame generated from "weighted_mod_ratio_and_DGE", the group name
 summarize_weighted_mod_ratio_and_DGE(df,group1_name = "Group1",group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = "significant", combine = TRUE)
 ```
 
-Input the m6Anet output data frame, the name of the directory the user wants outputs to be stored in, a name for output files, and the threshold for modification sites ( default = 0.9). 
+Input the m6Anet output data frame, the path to store results, a name for output files, and the threshold for modification sites (default = 0.9). 
 ```r
 m6A_seq_part1(m6Aout, gtf_path, output_directory, mod_ratio_df, probability = 0.9) 
 ```
