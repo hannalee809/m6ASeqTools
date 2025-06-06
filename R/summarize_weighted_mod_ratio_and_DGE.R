@@ -26,9 +26,9 @@ summarize_weighted_mod_ratio_and_DGE <- function(df,
   all_region <- list()
 
   # Use tidy evaluation to extract columns dynamically
-  log2FC_dge <- rlang::ensym(log2FC_dge)
-  log2fc_wmr <- rlang::ensym(log2fc_wmr)
-  sig_col <- rlang::ensym(sig_col)
+  log2FC_dge <- rlang::sym(log2FC_dge)
+  log2fc_wmr <- rlang::sym(log2fc_wmr)
+  sig_col <- rlang::sym(sig_col)
 
   # Define filtering rules as expressions
   filters <- list(
