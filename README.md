@@ -36,13 +36,17 @@ Input the data frame generated from m6A and the name for your output file and th
 ```r
 summarize_m6anet_output(m6Aout, output_file="qc_report.html")
 ```
+Input the m6a data frame output and then the probability modified cut-off which by default is >= 0.9.
+```r
+filter_m6a_sites(m6Aout, prob_modified=0.9)
+```
 
 Input the path to the GTF file of annotations and the function will output a data frame filled with transcript IDs and lengths of UTRs and CDS regions.
 ```r
 get_transcript_region_lengths("/Downloads/"reference.gtf")
 ```
 
-Input the data frame generated from "get_transcript_region_lengths" and the data frame from m6Anet and the function will output a data frame with the transcript positions for every m6A site.
+Input the data frame generated from "filter_m6a_sites" and the data frame from "get_transcript_region_lengths" and the function will output a data frame with the transcript positions for every m6A site.
 ```r
 map_relative_tx_regions_to_m6A(m6Aout,tx_regions)
 ```
@@ -52,17 +56,12 @@ Input the data frame generated from "map_relative_tx_regions_to_m6A" output and 
 plot_rel_positions(df,"label")
 ```
 
-Input the m6a output dataframe and then optional paths to save the csv summary and barplot.
+Input the filtered m6a output dataframe and then optional paths to save the csv summary and barplot and the function will return a CSV file containing percentage of each chromosome and a plot showing chromosomal distribution.
 ```r
 calculate_chromosome_location(m6Aout,output_csv=NULL, output_plot=NULL)
 ```
 
-Input the m6a data frame output and then the probability modified cut-off which by default is >= 0.9.
-```r
-filter_m6a_sites(m6Aout, prob_modified=0.9)
-```
-
-Input a m6a data frame containing site-level data and a string with what the user would like to name the modified ratio column.
+Input a m6a data frame containing site-level data and a string with what the user would like to name the modified ratio column and the function will return a data frame containing a column with weighted mod ratio values.
 ```r
 calculate_weighted_mod_ratio(m6a_df, mod_ratio_column = "mod_ratio")
 ```
@@ -86,6 +85,11 @@ log2fc_weighted_mod_ratio(group1,group2,group1_name="Group 1",group2_name="Group
 Input a data frame which must have a column named "log2fc_weighted_mod_ratio", a DESEQ dataframe, multiple column names along with the name of the experimental and control group. The function will return a plot comparing weighted mod ratio with gene expression.
 ```r
 weighted_mod_ratio_and_DGE(log2fc_df, deseq_df, gene_col = "gene_id", log2fc_col = "log2fc", padj_col = "padj", group1_name = "Group1", group2_name = "Group2")
+```
+
+Input the data frame generated from "weighted_mod_ratio_and_DGE", the group names, the name of the log2 fold change column from DESEQ, the name of the log2 fold change column from weighted mod ratio, the name of the significance column containing boolean values, and whether you want a combined summary. The function will return 
+```r
+summarize_weighted_mod_ratio_and_DGE(df,group1_name = "Group1",group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = "significant", combine = TRUE)
 ```
 
 ---
