@@ -74,15 +74,20 @@ m6a_seq_part2 <- function(vec_list,
   write.csv(wmr$data, "weighted_mod_ratio_and_DGE.csv", row.names = FALSE)
 
   # 4. Summarize biotype + region by expression clusters
+    
+  assign(log_column, paste0(group1_name, "_vs_", group2_name, "_log2FC"),envir=.GlobalEnv)
+  assign("log_wmr","log2fc_weighted_mod_ratio",envir=.GlobalEnv)
+  assign("sig_column","significant",envir=.GlobalEnv)
+  
   sum_wmr_dge <- summarize_weighted_mod_ratio_and_DGE(
-    df = wmr$data,
-    group1_name = group1_name,
-    group2_name = group2_name,
-    log2FC_dge = paste0(group1_name, "_vs_", group2_name, "_log2FC"),
-    log2fc_wmr = "log2fc_weighted_mod_ratio",
-    sig_col = "significant",
-    combine = TRUE
-  )
+      df = wmr$data,
+      group1_name = group1_name,
+      group2_name = group2_name,
+      log2FC_dge = log_column,
+      log2fc_wmr = log_wmr,
+      sig_col = sig_column,
+      combine = TRUE
+    )
 
   # Save summaries
   write.csv(sum_wmr_dge$biotype_summary_all, "summarized_weighted_mod_ratio_and_DGE_biotype_summary.csv", row.names = FALSE)
