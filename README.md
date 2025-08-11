@@ -91,13 +91,13 @@ Input the data frame generated from "weighted_mod_ratio_and_DGE", the group name
 ```r
 summarize_weighted_mod_ratio_and_DGE(df,group1_name = "Group1",group2_name = "Group2", log2FC_dge, log2fc_wmr, sig_col = "significant", combine = TRUE)
 ```
-
-Input the m6Anet output data frame, the path to store results, a name for output files, and the threshold for modification sites (default = 0.9). 
+An automated function to generate descriptive statistics after m6Anet is performed.
+Input the m6Anet output data frame, the path to the GTF file, the path to the output directory to store results, a name for output files, and the threshold for modification sites (default = 0.9). 
 ```r
 m6A_seq_part1(m6Aout, gtf_path, output_directory, mod_ratio_df, probability = 0.9) 
 ```
-
-Input a list of vectors containing m6A sites, transcript, or genes if the user wants to use the compare_m6A_distrubition function, the data frame generated from m6A_seq_part1 for one group, the resulting data frame from m6A_seq_part1 for another group, a string containing the group names, DESEQ resulting data frame, the column name from DESEQ for gene ID, the DESEQ column name for log2 fold change, the DESEQ column name for the adjusted p-value, and the path to store the resulting outputs in.
+An integrated function for a comparative analysis between two groups
+Input a list of vectors containing m6A sites, transcript, or genes if the user would like to use the compare_m6A_distrubition function (optional), the data frame generated from m6A_seq_part1 for one group, the resulting data frame from m6A_seq_part1 for another group, a string for group 1, and a string for group 2, DESEQ resulting data frame, the column name from DESEQ for gene ID, the DESEQ column name for log2 fold change, the DESEQ column name for the adjusted p-value, and the path to the directory to save resulting outputs.
 ```r
 m6a_seq_part2(vec_list, g1_df, g2_df, group1_name = "Group1", group2_name = "Group2", deseq, gene_col = "ensembl_gene_id", log2fc_col = "log2FoldChange", padj_col = "padj", output_dir)
 ```
