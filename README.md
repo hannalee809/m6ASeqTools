@@ -35,7 +35,7 @@ devtools::install_github("hannalee809/m6ASeqTools")
 ---
 
 ## Usage
-**Note:** We recommend 
+
 ### Part 1: Descriptive Statistics
 
 **m6A_seq_part1**: A function that does all descriptive statistics functions at once. Input the m6Anet output data frame, the path to the GTF file, the path to the output directory to store results, a name for output files, and the threshold for modification sites (default = 0.9). Specific functions can be run separately and usage for each are listed below. 
@@ -46,11 +46,11 @@ m6A_seq_part1(m6Aout, gtf_path, output_directory, mod_ratio_df, probability = 0.
 ```r
 summarize_m6anet_output(m6Aout, output_file="qc_report.html")
 ```
-**Filter m6A Sites:** Input the m6a data frame output and then the probability modified cut-off which by default is >= 0.9. We recommend saving this dataframe to your working environment to use to subsequent analysis, since these only include high confidence m6A sites.
+**Filter m6A sites:** Input the m6a data frame output and then the probability modified cut-off which by default is >= 0.9. We recommend saving this dataframe to your working environment to use to subsequent analysis, since these only include high confidence m6A sites.
 ```r
 filter_m6a_sites(m6Aout, prob_modified=0.9)
 ```
-**Transcript Region Annotation and Distribution:**
+**Transcript region annotation and distribution:**
 - First, input the path to the reference GTF file (i.e. Ensembl annotations) and the function will output a data frame with transcript IDs and associated UTR and CDS lengths.
 ```r
 get_transcript_region_lengths("/Downloads/"reference.gtf")
@@ -63,12 +63,12 @@ map_relative_tx_regions_to_m6A(m6Aout,tx_regions)
 ```r
 plot_rel_positions(df,"label")
 ```
-**Chromosomal Annotation and Distribution:**
+**Chromosomal annotation and distribution:**
 Input the filtered m6a output and then optional filepaths to save the output CSV and plot. Function will return a CSV file containing percentage of each chromosome and a barplot showing chromosomal distribution.
 ```r
 calculate_chromosome_location(m6Aout,output_csv=NULL, output_plot=NULL)
 ```
-**Weighted Modification Ratio Calculation:**
+**weighted modification ratio calculation:**
 Input m6a data frame (needs to contain transcript region analysis from **map_relative_tx_regions_to_m6A**) and a string with what the user would like to name the modified ratio column and the function will return a data frame containing a column with weighted mod ratio values.
 ```r
 calculate_weighted_mod_ratio(m6a_df, mod_ratio_column = "mod_ratio")
@@ -81,7 +81,7 @@ Input a list of vectors containing m6A sites, transcript, or genes if the user w
 ```r
 m6a_seq_part2(vec_list, g1_df, g2_df, group1_name = "Group1", group2_name = "Group2", deseq, gene_col = "ensembl_gene_id", log2fc_col = "log2FoldChange", padj_col = "padj", output_dir)
 ```
-**Comparing unique and common sites/transcripts/genes across multiple conditions:** Input a list of vectors containing gene names, transcript ids, or site ids for every group and the function will return a list of elements unique to each group, pairwise overlaps, elements shared by all groups, and each pair-wise overlap excluding the third group.
+**Comparing unique and common sites/transcripts/genes across conditions:** Input a list of vectors containing gene names, transcript ids, or site ids for every group and the function will return a list of elements unique to each group, pairwise overlaps, elements shared by all groups, and each pair-wise overlap excluding the third group.
 ```r
 gene_list <- list(
   sample1 = unique(sample1_m6a$ensembl_gene_name),
@@ -96,12 +96,12 @@ site_list <- list(
 compare_m6a_distribution(gene_list)
 compare_m6a_distribution(site_list)
 ```
-**Differential Methylation Levels between Two Groups using Weighted Modification Ratios**
+**Differential methylation levels between two groups using weighted modification ratios:**
 Input two dataframes, one for group1 (experimental group) and group2 (control group), from the **calculate_weighted_mod_ratio** along with column names for group1 and group2. and the function will return a data frame with the merged columns and a column for log2 of ratio of the weighted mod ratio for group 1 over group 2.
 ```r
 log2fc_weighted_mod_ratio(group1,group2,group1_name="Group 1",group2_name="Group 2")
 ```
-**Combine Differential Methylation with Differential Gene Expression**
+**Combine differential methylation with differential gene expression**
 Input output from **log2fc_weighted_mod_ratio**, DESEQ dataframe with log2 fold change and p-values. Specify the gene column name, log2fc column name, and pvalue name in the DESEQ dataframe. Specify group 1 (experimental group) and group 2 (control group) from **log2fc_weighted_mod_ratio.** **Make sure that the group order matches in the differential methylation and expression outputs, meaning that the experimental and control groups are identical!**
 ```r
 weighted_mod_ratio_and_DGE(log2fc_df, deseq_df, gene_col = "gene_id", log2fc_col = "log2fc", padj_col = "padj", group1_name = "Group1", group2_name = "Group2")
