@@ -5,14 +5,19 @@
 #' and optionally writes them to files.
 #'
 #' @param data.site_proba_df A data frame containing m6Anet output, must include
-#'                           'ensembl_transcript_id', 'transcript_position',
-#'                           'ensembl_gene_name', 'mod_ratio'.
+#'   'ensembl_transcript_id', 'transcript_position', 'ensembl_gene_name',
+#'   'mod_ratio'.
 #' @param gtf_path Path to the GENCODE/Ensembl GTF or GFF3 annotation file.
-#' @param output_bed Optional file path to write the BED6 file (for IGV feature track).
-#' @param output_bedgraph Optional file path to write the BedGraph file (for coverage/score track).
-#' @return A named list containing two data frames:
-#'         - m6a_df_with_genomic_coordinates: The input data merged with genomic coordinates (chr, genomic_pos, strand).
-#'         - bed_df: The final, formatted BED6 data frame.
+#' @param output_bed Optional file path to write the BED6 file (for IGV feature
+#'   track).
+#' @param output_bedgraph Optional file path to write the BedGraph file (for
+#'   coverage/score track).
+#' @return A named list containing two data frames: -
+#'   m6a_df_with_genomic_coordinates: The input data merged with genomic
+#'   coordinates (chr, genomic_pos, strand). The `name` column is constructed by
+#'   joining the transcript ID and the transcript position with an underscore
+#'   (i.e., `transcript_id_transcript_position`). - bed_df: The final, formatted
+#'   BED6 data frame.
 #' @importFrom dplyr select mutate transmute filter left_join
 #' @importFrom GenomicFeatures exonsBy mapFromTranscripts
 #' @importFrom GenomicRanges GRanges
@@ -95,25 +100,32 @@ create_bed_file <- function(data.site_proba_df,
 
 
   # merge with original m6A df
-  merged_genomic_coords <- merge(
+  merged_genomic_coords <- dplyr::left_join(
     data.site_proba_df,
-    m6a_gr_genomic_coords,
-    by.x = c("ensembl_transcript_id", "row_id"),
-    by.y = c("ensembl_transcript_id", "original_m6a_row_index")
+    m6a_gr_genomic_coords %>% select(-ensembl_transcript_id), # remove duplicate
+    by = c("row_id" = "original_m6a_row_index")
   )
+
+  # create name column in m6A df with the transcript name and position
+  # this will correspond to the name column in the bed file
+  merged_genomic_coords <- merged_genomic_coords %>%
+    dplyr::mutate(
+      name = paste0(ensembl_transcript_name, "_", transcript_position)
+    )
 
   # BED6 format (chr, start, end, name, score, strand)
   bed_df <- merged_genomic_coords %>%
     dplyr::mutate(
       start = genomic_pos - 1, # 0-based
-      end = genomic_pos, # 1-based end (for single base)
+      end = genomic_pos, # 1-based end (for single base),
+      name = paste0(ensembl_transcript_name, "_", transcript_position),
       score = mod_ratio * 1000 # Should be between 0 and 1000 for IGV color
     ) %>%
     dplyr::select(
       chr,
       start,
       end,
-      name = ensembl_gene_name,
+      name,
       score,
       strand
     )
