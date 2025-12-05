@@ -55,11 +55,6 @@
 #' A warning may be issued if the chromosome naming or reference genome differs
 #' between the two inputs.
 #'
-#' @importFrom dplyr select distinct left_join filter group_by summarize mutate
-#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal ggsave
-#' @importFrom magrittr %>%
-#' @import org.Hs.eg.db
-#'
 #' @examples
 #' \dontrun{
 #' res <- annotate_m6a(
@@ -82,7 +77,8 @@
 #' res$annotated_m6A_df
 #' }
 #'
-#' @importFrom GenomicRanges GRanges mcols findOverlaps queryHits subjectHits
+#' @importFrom GenomicRanges GRanges findOverlaps
+#' @importFrom S4Vectors queryHits subjectHits
 #' @importFrom IRanges IRanges
 #' @importFrom dplyr group_by summarise
 #' @importFrom magrittr %>%
@@ -151,8 +147,8 @@ annotate_m6a <- function(
     return(list(overlap_df = NULL, summary_df = NULL))
   }
 
-  m6a_idx <- GenomicRanges::queryHits(overlaps)
-  ann_idx <- GenomicRanges::subjectHits(overlaps)
+  m6a_idx <- S4Vectors::queryHits(overlaps)
+  ann_idx <- S4Vectors::subjectHits(overlaps)
 
 
   # 5. Overlap table (full metadata)

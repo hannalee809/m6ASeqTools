@@ -13,19 +13,24 @@ create_bed_file(
 }
 \arguments{
 \item{data.site_proba_df}{A data frame containing m6Anet output, must include
-'ensembl_transcript_id', 'transcript_position',
-'ensembl_gene_name', 'mod_ratio'.}
+'ensembl_transcript_id', 'transcript_position', 'ensembl_gene_name',
+'mod_ratio'.}
 
 \item{gtf_path}{Path to the GENCODE/Ensembl GTF or GFF3 annotation file.}
 
-\item{output_bed}{Optional file path to write the BED6 file (for IGV feature track).}
+\item{output_bed}{Optional file path to write the BED6 file (for IGV feature
+track).}
 
-\item{output_bedgraph}{Optional file path to write the BedGraph file (for coverage/score track).}
+\item{output_bedgraph}{Optional file path to write the BedGraph file (for
+coverage/score track).}
 }
 \value{
-A named list containing two data frames:
-- m6a_df_with_genomic_coordinates: The input data merged with genomic coordinates (chr, genomic_pos, strand).
-- bed_df: The final, formatted BED6 data frame.
+A named list containing two data frames: -
+m6a_df_with_genomic_coordinates: The input data merged with genomic
+coordinates (chr, genomic_pos, strand). The \code{name} column is constructed by
+joining the transcript ID and the transcript position with an underscore
+(i.e., \code{transcript_id_transcript_position}). - bed_df: The final, formatted
+BED6 data frame.
 }
 \description{
 This function takes transcript-level m6A positions, maps them to genomic
