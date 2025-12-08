@@ -135,8 +135,9 @@ p <- plot_relative_positions(example_m6A_naive_gli36_cells, label = "naive") # a
 ggsave("naive_tx_region.pdf", p)
 ```
 
-![Distribution of m6A across transcript regions](Transcript_Region_Density_naive.pdf)
-
+```{r tx-plot, echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("Transcript_Region_Density_naive.png")
+```
 
 ## Chromosomal Annotation and Distribution
 
