@@ -1,0 +1,50 @@
+---
+title: "Introduction to m6ASeqTools"
+author: "Hanna Lee"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to m6ASeqTools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include = FALSE}
+library(m6ASeqTools)
+```
+
+# Introduction
+`m6ASeqTools` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
+
+# Installation
+`m6ASeqTools` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
+
+```r
+# Install devtools if needed
+install.packages("devtools")
+
+# Install Bioconductor dependencies
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c(
+    "AnnotationDbi",
+    "org.Hs.eg.db",
+    "GenomicFeatures",
+    "GenomicRanges",
+    "IRanges",
+    "S4Vectors"
+))
+
+# Install m6ASeqTools from GitHub
+devtools::install_github("hannalee809/m6ASeqTools")
+```
+
+
