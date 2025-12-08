@@ -5,7 +5,6 @@
 #'
 #' @param data.site_proba_df The 'datadata frame from m6Anet output.
 #' @param output_file Name of the output HTML file.
-#' @param verbose Whether you want the progress messages or not.
 #' @return Renders an HTML summary QC report.
 #' @export
 

@@ -7,7 +7,6 @@
 summarize_m6anet_output(
   data.site_proba_df,
   output_file = "m6anet_qc_report.html",
-  verbose = TRUE,
   output_dir = NULL
 )
 }
@@ -15,8 +14,6 @@ summarize_m6anet_output(
 \item{data.site_proba_df}{The 'datadata frame from m6Anet output.}
 
 \item{output_file}{Name of the output HTML file.}
-
-\item{verbose}{Whether you want the progress messages or not.}
 }
 \value{
 Renders an HTML summary QC report.
