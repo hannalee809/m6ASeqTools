@@ -23,6 +23,9 @@ library(m6ASeqTools)
 # Introduction
 `m6ASeqTools` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
 
+# Table of Contents
+
+
 # Installation
 `m6ASeqTools` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
 
@@ -46,5 +49,24 @@ BiocManager::install(c(
 # Install m6ASeqTools from GitHub
 devtools::install_github("hannalee809/m6ASeqTools")
 ```
+
+## Input Data
+
+The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**.
+
+> **Note:** Some columns in the raw file contain multiple values combined with a `|` separator. These must be split before using the data with this package.
+
+For this tutorial, we provide two example datasets:
+
+1. 100 predicted m6A sites from the **Gli36** glioma cell line.  
+2. 100 predicted m6A sites from the same cell line following **IGF2BP2 siRNA knockdown**.
+
+These example datasets allow you to explore the package workflow without needing your own experimental data.
+
+```
+library(m6ASeqTools)
+
+```
+
 
 
