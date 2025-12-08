@@ -11,13 +11,11 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+  echo = TRUE,       # show R code
+  message = FALSE,   # suppress messages
+  warning = FALSE,   # suppress warnings
+  progress = FALSE   # hide knit progress lines
 )
-```
-
-```{r setup, include = FALSE}
-library(m6ASeqTools)
 ```
 
 # Introduction
@@ -50,7 +48,7 @@ BiocManager::install(c(
 devtools::install_github("hannalee809/m6ASeqTools")
 ```
 
-## Input Data
+# Input Data
 
 The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**.
 
@@ -63,19 +61,97 @@ For this tutorial, we provide two example datasets:
 
 These example datasets allow you to explore the package workflow without needing your own experimental data.
 
-```{r, }
+```{r import-data}
 library(m6ASeqTools)
-data("example_m6A_naive_gli36_cells.rda")
-data("example_m6A_igf_gli36_cells.rda")
+
+# Load the example datasets included in the package
+data("example_m6A_naive_gli36_cells")
+data("example_m6A_igf_gli36_cells")
+
+# Preview the first few rows
 head(example_m6A_naive_gli36_cells)
 ```
 
-# Incorporating External Annotations
+# Part 1: Descriptive Statistics
 
-## 
-```{r}
+## Summary Report of m6Anet Output
 
+After importing the `data.site_proba.csv` file in the required format, you can generate a summary report using the `summarize_m6anet_output()` function. This function produces an HTML report that includes the following:
+
+1. **Overview table:** Total number of detected m6A sites, transcripts, and genes, as well as the number of sites, transcripts, and genes with a **modification probability > 90%**. These high-confidence sites are filtered and used for the rest of the report, and they should also be used for downstream analyses.
+2. **High-confidence sites per transcript:** Table and histogram showing the distribution of the number of high-confidence sites per transcript.
+3. **High-confidence transcripts per gene:** Table and histogram showing the distribution of high-confidence transcripts per gene.
+4. **Transcript biotype distribution:** Table and pie chart(s) showing counts and frequencies of high-confidence transcripts by biotype.
+5. **Modified k-mer distribution:** Table and bar graph showing counts and frequencies of modified k-mers.
+6. **Transcript length distribution:** Table and density graph showing the lengths of modified transcripts, grouped into bins: 101–500 bp, 501–1000 bp, 1001–5000 bp, 5001–10000 bp, and >10000 bp.
+
+```{r summarize-m6anet-output, eval=FALSE}
+# Generate the summary HTML report
+summarize_m6anet_output(
+  example_m6A_naive_gli36_cells, 
+  output_file = "naive_summary_report.html"
+)
 ```
+
+## Filter m6A Sites
+m6Anet recommends retaining sites with probability_modified > 0.9.
+This function applies a user-defined threshold (default = 0.9) and returns the filtered dataset.
+Use this filtered output for downstream analyses.
+
+```{r filter-m6a, eval = FALSE}
+example_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
+                                       probablity_modified=0.9)
+```
+
+## Transcript Region Analysis
+These functions allow you to:
+
+1. **Assign each m6A site to a transcript region**  
+   (5'UTR, CDS, or 3'UTR)
+
+2. **Compute its relative position within that region**, scaled 0–1.
+This
+
+3. **Visualize the global distribution of m6A** across these regions using a kernel density plot.
+
+This workflow requires a GTF annotation file.
+
+```{r tx-regions, eval = FALSE}
+# Path to GTF annotation file
+gtf_path <- "/path/to/gencode.v45.annotation.gtf"
+
+# Step 1: Extract transcript region lengths (5'UTR, CDS, 3'UTR)
+tx_df <- get_transcript_region_lengths(gtf_path)
+
+# Step 2: Annotate each m6A site with its region and relative position
+example_m6A_naive_gli36_cells <-
+  map_relative_tx_regions_to_m6A(
+    example_m6A_naive_gli36_cells,
+    tx_df
+  )
+
+# Step 3: Visualize distribution of m6A across transcript regions
+p <- plot_relative_positions(example_m6A_naive_gli36_cells, label = "naive") # add plot label if desired
+ggsave("naive_tx_region.pdf", p)
+```
+
+![Distribution of m6A across transcript regions](Transcript_Region_Density_naive.pdf)
+
+
+## Chromosomal Annotation and Distribution
+
+
+
+
+
+# Part 2: Incorporating External Annotations
+
+# Part 3: Comparative Analysis between Conditions
+
+# Extra: m6A_seq_part1, m6A_seq_part2
+
+
+
 
 
 
