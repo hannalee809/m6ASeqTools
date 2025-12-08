@@ -63,8 +63,17 @@ For this tutorial, we provide two example datasets:
 
 These example datasets allow you to explore the package workflow without needing your own experimental data.
 
-```
+```{r, }
 library(m6ASeqTools)
+data("example_m6A_naive_gli36_cells.rda")
+data("example_m6A_igf_gli36_cells.rda")
+head(example_m6A_naive_gli36_cells)
+```
+
+# Incorporating External Annotations
+
+## 
+```{r}
 
 ```
 
