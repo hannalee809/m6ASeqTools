@@ -69,7 +69,7 @@ create_bed_file <- function(data.site_proba_df,
   names(transcripts_granges_list) <- id_map[names(transcripts_granges_list)]
 
   # Run the mapping function
-  m6a_gr_genomic_coords <- mapFromTranscripts(m6a_gr, transcripts_granges_list)
+  m6a_gr_genomic_coords <- GenomicFeatures::mapFromTranscripts(m6a_gr, transcripts_granges_list)
 
   # Convert to Data Frame
   m6a_gr_genomic_coords <- as.data.frame(m6a_gr_genomic_coords, row.names = NULL)

@@ -6,7 +6,7 @@
 \usage{
 annotate_m6a(
   m6a_df,
-  annot_df,
+  annotation_df,
   m6a_chr_col = "chr",
   m6a_start_col = "start",
   m6a_end_col = "end",
@@ -23,10 +23,6 @@ annotate_m6a(
 \arguments{
 \item{m6a_df}{A data frame containing m6A site coordinates. Must include
 columns for chromosome, start, end, and strand.}
-
-\item{annot_df}{A data frame containing annotation genomic intervals.
-Must include columns for chromosome, start, end, and strand, plus an
-annotation name column specified in \code{annot_name_col}.}
 
 \item{m6a_chr_col}{Name of the m6A chromosome column.}
 
@@ -80,6 +76,10 @@ Overlaps are detected using \code{findOverlaps()}. All annotation metadata
 columns are preserved and attached to the overlap table.
 A warning may be issued if the chromosome naming or reference genome differs
 between the two inputs.}
+
+\item{annot_df}{A data frame containing annotation genomic intervals.
+Must include columns for chromosome, start, end, and strand, plus an
+annotation name column specified in \code{annot_name_col}.}
 }
 \description{
 This function identifies overlaps between m6A sites and a user-provided

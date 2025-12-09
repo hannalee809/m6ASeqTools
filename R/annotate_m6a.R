@@ -86,7 +86,7 @@
 
 annotate_m6a <- function(
   m6a_df,
-  annot_df,
+  annotation_df,
   m6a_chr_col = "chr",
   m6a_start_col = "start",
   m6a_end_col = "end",
@@ -122,7 +122,7 @@ annotate_m6a <- function(
   m6a_gr <- GenomicRanges::GRanges(
     seqnames = m6a_df[[m6a_cols["chr"]]],
     ranges = IRanges::IRanges(start = m6a_start,
-                     end = m6a_df[[m6a_cols["end"]]]),
+                              end = m6a_df[[m6a_cols["end"]]]),
     strand = if ("strand" %in% names(m6a_df)) m6a_df[[m6a_cols["strand"]]] else "*"
   )
 
@@ -135,7 +135,7 @@ annotate_m6a <- function(
   ann_gr <- GenomicRanges::GRanges(
     seqnames = annotation_df[[ann_cols["chr"]]],
     ranges = IRanges::IRanges(start = ann_start,
-                     end = annotation_df[[ann_cols["end"]]]),
+                              end = annotation_df[[ann_cols["end"]]]),
     strand = if ("strand" %in% names(annotation_df)) annotation_df[[ann_cols["strand"]]] else "*"
   )
 
