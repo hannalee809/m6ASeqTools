@@ -64,9 +64,8 @@ These example datasets allow you to explore the package workflow without needing
 ```{r import-data}
 library(m6ASeqTools)
 
-# Load the example datasets included in the package
+# Load the example dataset included in the package
 data("example_m6A_naive_gli36_cells")
-data("example_m6A_igf_gli36_cells")
 
 # Preview the first few rows
 head(example_m6A_naive_gli36_cells)
@@ -93,10 +92,15 @@ summarize_m6anet_output(
 )
 ```
 
+```{r summary-plot, echo=FALSE, out.width="100%", out.height="700px"}
+knitr::include_graphics("naive_html_summary.png")
+```
+
 ## Filter m6A Sites
 m6Anet recommends retaining sites with probability_modified > 0.9.
 This function applies a user-defined threshold (default = 0.9) and returns the filtered dataset.
-Use this filtered output for downstream analyses.
+
+> **Note:** Use this filtered dataset for downstream analyses.
 
 ```{r filter-m6a, eval = FALSE}
 example_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
@@ -132,18 +136,75 @@ example_m6A_naive_gli36_cells <-
 
 # Step 3: Visualize distribution of m6A across transcript regions
 p <- plot_relative_positions(example_m6A_naive_gli36_cells, label = "naive") # add plot label if desired
-ggsave("naive_tx_region.pdf", p)
 ```
 
-```{r tx-plot, echo=FALSE, out.width="80%", fig.align="center"}
+```{r tx-plot, echo=FALSE, out.width="80%", out.height="400px"}
 knitr::include_graphics("Transcript_Region_Density_naive.png")
 ```
 
 ## Chromosomal Annotation and Distribution
+This function assigns each m6A site to its chromosome using human gene annotations from org.Hs.eg.db. Provide the m6A dataframe and optionally specify whether the results should be saved as a CSV and whether a chromosomal distribution plot should be generated.
 
+```{r chr-dist, eval=FALSE}
+calculate_chromosome_location(example_m6A_naive_gli36_cells,
+                              output_csv=NULL, 
+                              output_plot="naive_chr_distribution.png")
+```
 
+```{r chr-plot, echo=FALSE, out.width="80%", out.height="400px"}
+knitr::include_graphics("naive_chr_distribution.png")
+```
 
+## Weighted Modification Ratio Calculation:
+This metric summarizes transcript-level methylation by combining the number of modified sites, their modification ratios, and transcript length. It requires the annotated output from map_relative_tx_regions_to_m6A(), since transcript regions are used in downstream comparisons.
 
+The **weighted modification ratio** per transcript is defined as:
+
+$$
+\text{Weighted Modification Ratio} = \frac{\sum_{i=1}^{n} r_i}{L}
+$$
+
+where:  
+
+- \(r_i\) = modification ratio at site \(i\)  
+- \(n\) = number of m6A sites in the transcript  
+- \(L\) = length of the transcript (in nucleotides)
+
+The function returns a dataframe containing one row per transcript with:
+
+- total modification ratio across all sites
+- counts of sites in 5′UTR, CDS, and 3′UTR
+- the computed weighted modification ratio
+
+```{r calc-wmr, eval=FALSE}
+calculate_weighted_mod_ratio(example_m6A_naive_gli36_cells, mod_ratio_column = "mod_ratio")
+```
+
+```{r wmr-table, echo=FALSE}
+library(kableExtra)
+
+knitr::kable(
+  data.frame(
+    ensembl_transcript_name = c("ENST0001", "ENST0002"),
+    ensembl_transcript_id = c("TXNAME1", "TXNAME2"),
+    ensembl_gene_id = c("ENSG0001", "ENSG0002"),
+    ensembl_gene_name = c("GENE1", "GENE2"),
+    gene_biotype = c("protein_coding", "retained_intron"),
+    transcript_length = c("2417", "2689"),
+    sum_mod = c("1.81", "1.79"),
+    n_sites = c("3", "3"),
+    sites_in_5utr = c("0", "0"),
+    sites_in_cds = c("0", "0"),
+    sites_in_3utr = c("3", "3"),
+    weighted_mod_ratio = c("0.00075", "0.00067")
+  ),
+  align = "l"
+) %>%
+  kable_styling(
+    font_size = 10,
+    full_width = FALSE
+  )
+```
 
 # Part 2: Incorporating External Annotations
 
