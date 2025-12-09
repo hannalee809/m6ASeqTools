@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 # Installation
 `m6ASeqTools` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
 
-```r
+```{r installation, eval=FALSE}
 # Install devtools if needed
 install.packages("devtools")
 
@@ -52,7 +52,27 @@ devtools::install_github("hannalee809/m6ASeqTools")
 
 # Input Data
 
-The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**.
+The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**. The columns include:
+
+1. **m6A site information**
+
+    - `ensembl_transcript_id`: Ensembl transcript identifier
+    - `ensembl_gene_id`: Ensembl gene identifier
+    - `otthumg_gene_id` / `otthumg_transcript_id`: Optional human gene/transcript IDs for cross-referencing
+    - `ensembl_transcript_name` / `ensembl_gene_name`: Human-readable transcript and gene names
+    - `transcript_length`: Length of the transcript in nucleotides
+    - `gene_biotype`: Biotype of the transcript (e.g., protein_coding, lncRNA)
+    - `transcript_position`: Position of the m6A site within the transcript
+
+2. **Read coverage**
+
+    -`n_reads`: Number of reads covering the m6A site
+
+3. **Modification information**
+
+    - `probability_modified`: Predicted probability of modification at the site (0–1)
+    - `kmer`: Sequence k-mer context surrounding the modified nucleotide
+    - `mod_ratio`: Observed modification ratio (0–1), reflecting the proportion of reads supporting the modification
 
 > **Note:** Some columns in the raw file contain multiple values combined with a `|` separator. These must be split before using the data with this package.
 
@@ -63,14 +83,14 @@ For this tutorial, we provide two example datasets:
 
 These example datasets allow you to explore the package workflow without needing your own experimental data.
 
-```{r import-data}
+```{r import-data, echo=FALSE}
 library(kableExtra)
 library(m6ASeqTools)
+```
 
+```{r example-data-load}
 # Load the example dataset included in the package
 data("example_m6A_naive_gli36_cells")
-
-# Preview the first few rows
 head(example_m6A_naive_gli36_cells)
 ```
 
@@ -305,9 +325,9 @@ The function takes two inputs:
 1. **m6A bed table** with chromosome, start, end, and strand (from `create_bed_file()`)
 2. **Annotation table** with genomic intervals (chr, start, end, strand) and a feature label (e.g., RBP_name, SNP_ID, miRNA_ID)
 
-> **Note:** By default, the function assumes the m6a and external bed columns are named chr, start, end, and strand, unless specified otherwise.
+> **Note:** Both inputs should use the same coordinate system — either 0-based or 1-based. By default, the function assumes 0-based coordinates (`zero_based` = TRUE). If your input tables use 1-based coordinates, set `zero_based` = FALSE.
 
-Both inputs are internally converted to `GenomicRanges` objects. Overlaps are computed with `findOverlaps()`, and all annotation metadata columns are retained. Strand matching can be required or ignored depending on the use case.
+Both inputs are internally converted to `GenomicRanges` objects. If `zero_based = TRUE`, the coordinates are automatically converted from 0-based to 1-based as required by `GenomicRanges`. Overlaps are computed using `findOverlaps()`, and all annotation metadata columns are retained. Strand matching can be required or ignored depending on the use case.
 
 The function returns two data frames:
 
@@ -322,13 +342,58 @@ The function returns two data frames:
     - Original m6A site information
     - Overlapping_Features: semicolon-separated list of feature names
     - Feature_Count: number of unique overlapping features
-  
-```{r annotate-m6A-example}
-# Example of annotate_m6A() using bed file 
+    
+```{r annotate-m6A-example, message=FALSE, warning=FALSE}
+# Step 1: Load example BED file for Naive Gli36
+data("example_m6A_naive_gli36_BED")
 ```
 
-  
+```{r show-naive-bed, echo=FALSE}
+knitr::kable(head(example_m6A_naive_gli36_BED), 
+             caption = "First 6 rows of example m6A BED file")
+```
 
+```{r load-example-rbp}
+# Step 2: Load example RBP annotation
+data("example_rbp_annotation")
+
+# Define columns
+colnames(example_rbp_annotation) <- c(
+"chr", "start", "end", "peak_id", "strand",
+"RBP_name", "experiment_method", "sample",
+"accession_of_raw_data", "conf_score"
+)
+```
+
+```{r show-rbp-bed, echo=FALSE}
+knitr::kable(head(example_rbp_annotation),
+caption = "First 6 rows of example RBP annotation") %>%
+  kableExtra::kable_styling(font_size = 11)
+```
+
+```{r run-annotation,message=FALSE, warning=FALSE}
+# Step 3: Run annotation function
+annotated_example_naive_with_rbp <- annotate_m6a(
+example_m6A_naive_gli36_BED,
+example_rbp_annotation,
+feature_col = "RBP_name"
+)
+```
+
+Here are the outputs of the function:
+```{r annotation-output01, echo=FALSE}
+knitr::kable(head(annotated_example_naive_with_rbp$overlap_df),
+caption = "First 6 rows of overlap between m6A sites and RBP annotations") %>%
+  kableExtra::kable_styling(font_size = 11)
+```
+
+```{r annotation-output02, echo=FALSE}
+knitr::kable(head(annotated_example_naive_with_rbp$annotated_m6A_df),
+caption = "First 6 rows of summarized annotated m6A sites") %>%
+  kableExtra::kable_styling(font_size = 11)
+```
+
+Both output dataframes include a reference to the original m6A sites. In `overlap_df`, the first column `m6a_index` directly corresponds to the m6A site identifier from the input BED file, providing a one-to-one mapping for each overlap with RBPs. In `annotated_m6A_df`, the first column is a `row_id` that references the row of the original m6A dataframe. This allows users to easily merge the summarized annotation back with their original m6A dataset for downstream analyses. Essentially, `overlap_df` gives a detailed, long-format view of individual overlaps, while `annotated_m6A_df` provides a compact summary with a direct link to the original m6A sites.
 
 # Part 3: Comparative Analysis between Conditions
 
