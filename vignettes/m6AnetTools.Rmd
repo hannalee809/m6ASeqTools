@@ -21,6 +21,8 @@ knitr::opts_chunk$set(
 # Introduction
 `m6ASeqTools` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
 
+# Add workflow picture
+
 # Table of Contents
 
 
@@ -62,6 +64,7 @@ For this tutorial, we provide two example datasets:
 These example datasets allow you to explore the package workflow without needing your own experimental data.
 
 ```{r import-data}
+library(kableExtra)
 library(m6ASeqTools)
 
 # Load the example dataset included in the package
@@ -100,10 +103,10 @@ knitr::include_graphics("naive_html_summary.png")
 m6Anet recommends retaining sites with probability_modified > 0.9.
 This function applies a user-defined threshold (default = 0.9) and returns the filtered dataset.
 
-> **Note:** Use this filtered dataset for downstream analyses.
+> **Important:** Use this filtered dataset from this point onward for downstream analyses.
 
 ```{r filter-m6a, eval = FALSE}
-example_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
+filtered_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
                                        probablity_modified=0.9)
 ```
 
@@ -128,14 +131,44 @@ gtf_path <- "/path/to/gencode.v45.annotation.gtf"
 tx_df <- get_transcript_region_lengths(gtf_path)
 
 # Step 2: Annotate each m6A site with its region and relative position
-example_m6A_naive_gli36_cells <-
+filtered_m6A_naive_gli36_cells <-
   map_relative_tx_regions_to_m6A(
-    example_m6A_naive_gli36_cells,
+    filtered_m6A_naive_gli36_cells,
     tx_df
   )
 
 # Step 3: Visualize distribution of m6A across transcript regions
-p <- plot_relative_positions(example_m6A_naive_gli36_cells, label = "naive") # add plot label if desired
+p <- plot_relative_positions(filtered_m6A_naive_gli36_cells, label = "naive") # add plot label if desired
+```
+
+The output includes the original m6A site information along with transcript-region annotations (5′UTR, CDS, 3′UTR). For each region, the table reports its length, start and end positions, the region in which the site falls, and the site’s relative position within that region. Some sites may not map to any transcript region (i.e., sites on non-coding transcripts with no annotated UTR/CDS structures). These sites are retained in the output, with `NA` values for the transcript-region fields.
+
+```{r tx-region-table, echo=FALSE}
+knitr::kable(
+data.frame(
+m6a_site_info... = c("..."),
+utr5_length = "159",
+utr3_length = "1457",
+cds_length_tx = "834",
+start_utr5 = "1",
+end_utr5 = "159",
+start_cds = "160",
+end_cds = "992",
+start_utr3 = "993",
+end_utr3 = "2449",
+isin_5utr = "0",
+isin_cds = "0",
+isin_3utr = "1",
+rel_5utr = "NA",
+rel_cds = "NA",
+rel_3utr = "0.78"
+),
+align="l"
+) %>% 
+  kable_styling(
+    font_size = 10,
+    full_width = FALSE
+  )
 ```
 
 ```{r tx-plot, echo=FALSE, out.width="80%", out.height="400px"}
@@ -146,7 +179,7 @@ knitr::include_graphics("Transcript_Region_Density_naive.png")
 This function assigns each m6A site to its chromosome using human gene annotations from org.Hs.eg.db. Provide the m6A dataframe and optionally specify whether the results should be saved as a CSV and whether a chromosomal distribution plot should be generated.
 
 ```{r chr-dist, eval=FALSE}
-calculate_chromosome_location(example_m6A_naive_gli36_cells,
+calculate_chromosome_location(filtered_m6A_naive_gli36_cells,
                               output_csv=NULL, 
                               output_plot="naive_chr_distribution.png")
 ```
@@ -155,7 +188,7 @@ calculate_chromosome_location(example_m6A_naive_gli36_cells,
 knitr::include_graphics("naive_chr_distribution.png")
 ```
 
-## Weighted Modification Ratio Calculation:
+## Weighted Modification Ratio Calculation
 This metric summarizes transcript-level methylation by combining the number of modified sites, their modification ratios, and transcript length. It requires the annotated output from map_relative_tx_regions_to_m6A(), since transcript regions are used in downstream comparisons.
 
 The **weighted modification ratio** per transcript is defined as:
@@ -177,7 +210,7 @@ The function returns a dataframe containing one row per transcript with:
 - the computed weighted modification ratio
 
 ```{r calc-wmr, eval=FALSE}
-calculate_weighted_mod_ratio(example_m6A_naive_gli36_cells, mod_ratio_column = "mod_ratio")
+calculate_weighted_mod_ratio(filtered_m6A_naive_gli36_cells, mod_ratio_column = "mod_ratio")
 ```
 
 ```{r wmr-table, echo=FALSE}
@@ -185,12 +218,7 @@ library(kableExtra)
 
 knitr::kable(
   data.frame(
-    ensembl_transcript_name = c("ENST0001", "ENST0002"),
-    ensembl_transcript_id = c("TXNAME1", "TXNAME2"),
-    ensembl_gene_id = c("ENSG0001", "ENSG0002"),
-    ensembl_gene_name = c("GENE1", "GENE2"),
-    gene_biotype = c("protein_coding", "retained_intron"),
-    transcript_length = c("2417", "2689"),
+    m6a_transcript_info... = c("...", "..."),
     sum_mod = c("1.81", "1.79"),
     n_sites = c("3", "3"),
     sites_in_5utr = c("0", "0"),
@@ -207,6 +235,100 @@ knitr::kable(
 ```
 
 # Part 2: Incorporating External Annotations
+This part of the package provides tools to convert m6Anet transcript-based coordinates into genomic coordinates using GTF annotations. The resulting genomic positions can be exported as a BED file, enabling direct visualization of m6A sites in genome browsers such as IGV or UCSC Genome Browser. In addition, a secondary function allows users to annotate their m6A BED file with any user-provided BED datasets, making it easy to integrate external features such as RBP peaks, miRNA binding sites, SNPs, or other genomic intervals.
+
+## Converting m6Anet Transcript Coordinates to Genomic Coordinates and Creating BED Files:
+m6Anet reports modification sites using transcript-based positions, which cannot be directly viewed in genome browsers. To enable genomic visualization and downstream annotation, the package includes a function that:
+
+- maps transcript positions to genomic coordinates using a user-provided GTF annotation
+- generates standard BED6 and BedGraph tables
+- optionally writes these to files for IGV/UCSC Genome Browser
+
+This enables seamless integration of m6A site calls with external genomic features such as RBP binding sites, miRNA binding sites, SNPs, or any other interval-based annotation.
+
+Inputs:
+
+- **data.site_proba_df:** m6Anet output; must include ensembl_transcript_id, transcript_position, ensembl_gene_name, mod_ratio.
+- **gtf_path:** path to a GENCODE/Ensembl GTF (or GFF3) annotation.
+- **output_bed:**  optional path to write the BED6 file.
+- **output_bedgraph:** optional path to write the BedGraph file.
+
+```{r bed-file, eval=FALSE}
+create_bed_file(
+  filtered_m6A_naive_gli36_cells,
+  gtf_path,
+  output_bed = "path/to/ouput/bed",
+  output_bedgraph = "path/to/output/bedgraph"
+)
+```
+
+Outputs:
+
+1. m6a_df_with_genomic_coordinates
+
+    - transcript-level positions mapped to chr, genomic_pos, and strand.
+    - the `name` column is automatically constructed as transcriptID_position (e.g., ENST00000335137_1285).
+    - `score`: mod_ratio * 1000  (for IGV visualization of m6A levels)
+
+2. bed_df: ready-to-visualize BED6 data frame.
+3. BED6 and BEDGRAPH files saved to user-provided path.
+
+
+```{r bed-format, echo=FALSE}
+knitr::kable(
+data.frame(
+chr = c("chr1", "chr1", "chr2"),
+start = c(10048291, 10599321, 20488511),
+end = c(10048292, 10599322, 20488512),
+name = c("ENST00000335137_1285",
+"ENST00000284987_452",
+"ENST00000491231_97"),
+score = c(820, 640, 995),
+strand = c("+", "-", "+")
+),
+caption = "Example BED6 output generated by create_bed_file()"
+)
+```
+
+This figure shows an example of m6A visualization in IGV using the generated bedGraph file. m6A levels are represented by the score track. The view is zoomed into chromosome 17, where the pink signal reflects m6A levels and the blue track shows the gene annotation.
+ 
+```{r igv-plot, echo=FALSE, out.width="100%", out.height="200px"}
+knitr::include_graphics("naive_m6a_igv_chr17.png")
+```
+
+## Annotating m6A Sites with External Genomic Features
+
+This section demonstrates how to annotate m6A sites using user-provided genomic feature files (e.g., RBP binding sites, miRNA targets, SNPs, enhancers, promoters). The annotate_m6A_overlaps() function accepts any BED-like table as long as genomic coordinates and a feature column are supplied.
+
+The function takes two inputs:
+
+1. **m6A bed table** with chromosome, start, end, and strand (from `create_bed_file()`)
+2. **Annotation table** with genomic intervals (chr, start, end, strand) and a feature label (e.g., RBP_name, SNP_ID, miRNA_ID)
+
+> **Note:** By default, the function assumes the m6a and external bed columns are named chr, start, end, and strand, unless specified otherwise.
+
+Both inputs are internally converted to `GenomicRanges` objects. Overlaps are computed with `findOverlaps()`, and all annotation metadata columns are retained. Strand matching can be required or ignored depending on the use case.
+
+The function returns two data frames:
+
+1. **overlap_df** containing row-level overlaps
+
+    - `m6A_index`: index of the m6A site, corresponds with the row ID in the original m6A dataframe
+    - Feature name (from `feature_col`)
+    - All additional annotation metadata columns 
+
+2. **annotated_m6A_df**
+
+    - Original m6A site information
+    - Overlapping_Features: semicolon-separated list of feature names
+    - Feature_Count: number of unique overlapping features
+  
+```{r annotate-m6A-example}
+# Example of annotate_m6A() using bed file 
+```
+
+  
+
 
 # Part 3: Comparative Analysis between Conditions
 

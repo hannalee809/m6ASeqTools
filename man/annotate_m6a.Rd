@@ -98,7 +98,7 @@ res <- annotate_m6a(
   m6a_start_col = "start",
   m6a_end_col = "end",
   m6a_strand_col = "strand",
-  annot_chr_col = "chrom",
+  annot_chr_col = "chr",
   annot_start_col = "start",
   annot_end_col = "end",
   annot_strand_col = "strand",
