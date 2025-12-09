@@ -102,6 +102,9 @@ annotate_m6a <- function(
 
 
   # 1. Validate columns
+  m6a_cols <- c(chr = m6a_chr_col, start = m6a_start_col, end = m6a_end_col, strand = m6a_strand_col)
+  ann_cols <- c(chr = annot_chr_col, start = annot_start_col, end = annot_end_col, strand = annot_strand_col)
+
   if (!all(m6a_cols %in% names(m6a_df)))
     stop("Missing required m6A coordinate columns in m6a_df")
 
