@@ -2,7 +2,12 @@
 title: "Introduction to m6ASeqTools"
 author: "Hanna Lee"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+   rmarkdown::html_document:
+    toc: true
+    toc_depth: 2 
+    toc_float: true
+    theme: flatly
 vignette: >
   %\VignetteIndexEntry{Introduction to m6ASeqTools}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,11 +25,6 @@ knitr::opts_chunk$set(
 
 # Introduction
 `m6ASeqTools` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
-
-# Add workflow picture
-
-# Table of Contents
-
 
 # Installation
 `m6ASeqTools` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
@@ -66,7 +66,7 @@ The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` f
 
 2. **Read coverage**
 
-    -`n_reads`: Number of reads covering the m6A site
+    - `n_reads`: Number of reads covering the m6A site
 
 3. **Modification information**
 
@@ -94,7 +94,7 @@ data("example_m6A_naive_gli36_cells")
 head(example_m6A_naive_gli36_cells)
 ```
 
-# Part 1: Descriptive Statistics
+# Descriptive Statistics
 
 ## Summary Report of m6Anet Output
 
@@ -115,7 +115,7 @@ summarize_m6anet_output(
 )
 ```
 
-```{r summary-plot, echo=FALSE, out.width="100%", out.height="700px"}
+```{r summary-plot, echo=FALSE, out.width="100%", out.height="800px"}
 knitr::include_graphics("naive_html_summary.png")
 ```
 
@@ -209,7 +209,7 @@ knitr::include_graphics("naive_chr_distribution.png")
 ```
 
 ## Weighted Modification Ratio Calculation
-This metric summarizes transcript-level methylation by combining the number of modified sites, their modification ratios, and transcript length. It requires the annotated output from map_relative_tx_regions_to_m6A(), since transcript regions are used in downstream comparisons.
+This metric summarizes transcript-level methylation by combining the number of modified sites, their modification ratios, and transcript length. You can either input the m6a dataframe or the annotated output from map_relative_tx_regions_to_m6A(), as this will provide a regional summary in addition to the weighted modificaition ratio calculation.
 
 The **weighted modification ratio** per transcript is defined as:
 
@@ -226,7 +226,7 @@ where:
 The function returns a dataframe containing one row per transcript with:
 
 - total modification ratio across all sites
-- counts of sites in 5′UTR, CDS, and 3′UTR
+- counts of sites in 5′UTR, CDS, and 3′UTR (if `tx_info` = TRUE)
 - the computed weighted modification ratio
 
 ```{r calc-wmr, eval=FALSE}
@@ -249,12 +249,12 @@ knitr::kable(
   align = "l"
 ) %>%
   kable_styling(
-    font_size = 10,
+    font_size = 11,
     full_width = FALSE
   )
 ```
 
-# Part 2: Incorporating External Annotations
+# Incorporating External Annotations
 This part of the package provides tools to convert m6Anet transcript-based coordinates into genomic coordinates using GTF annotations. The resulting genomic positions can be exported as a BED file, enabling direct visualization of m6A sites in genome browsers such as IGV or UCSC Genome Browser. In addition, a secondary function allows users to annotate their m6A BED file with any user-provided BED datasets, making it easy to integrate external features such as RBP peaks, miRNA binding sites, SNPs, or other genomic intervals.
 
 ## Converting m6Anet Transcript Coordinates to Genomic Coordinates and Creating BED Files:
@@ -395,9 +395,9 @@ caption = "First 6 rows of summarized annotated m6A sites") %>%
 
 Both output dataframes include a reference to the original m6A sites. In `overlap_df`, the first column `m6a_index` directly corresponds to the m6A site identifier from the input BED file, providing a one-to-one mapping for each overlap with RBPs. In `annotated_m6A_df`, the first column is a `row_id` that references the row of the original m6A dataframe. This allows users to easily merge the summarized annotation back with their original m6A dataset for downstream analyses. Essentially, `overlap_df` gives a detailed, long-format view of individual overlaps, while `annotated_m6A_df` provides a compact summary with a direct link to the original m6A sites.
 
-# Part 3: Comparative Analysis between Conditions
+# Comparative Analysis
 
-# Extra: m6A_seq_part1, m6A_seq_part2
+# Combined Functions (Part 1 & 2)
 
 
 

@@ -4,12 +4,18 @@
 \alias{calculate_weighted_mod_ratio}
 \title{Calculate Weighted Modification Ratio}
 \usage{
-calculate_weighted_mod_ratio(data_frame, mod_ratio_column = "mod_ratio")
+calculate_weighted_mod_ratio(
+  data_frame,
+  mod_ratio_column = "mod_ratio",
+  tx_info = TRUE
+)
 }
 \arguments{
 \item{data_frame}{A data frame with m6A site-level data with transcript regions (from \code{get_transcript_region_lengths()})}
 
 \item{mod_ratio_column}{Character string, name of the column with modification ratios (default: "mod_ratio")}
+
+\item{tx_info}{}
 }
 \value{
 A data frame with weighted modification ratios per transcript
