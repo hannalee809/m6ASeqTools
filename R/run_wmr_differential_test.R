@@ -14,7 +14,9 @@
 #'
 #' @return A tibble with one row per transcript containing:
 #'   \itemize{
-#'     \item `ensembl_transcript_id`
+#'     \item `m6A transcript info`
+#'     \item `median weighted mod ratio for condition 1`
+#'     \item `median weighted mod ratio for condition 2`
 #'     \item `median_diff` — median WMR( condition2 – condition1 )
 #'     \item `p_value` — Wilcoxon rank-sum test p-value
 #'   }
@@ -27,50 +29,66 @@
 #' @importFrom stats wilcox.test
 #' @export
 
-run_wmr_differential_test <- function(
-  condition1_list,
-  condition2_list,
-  condition1_name,
-  condition2_name
-) {
-
-  # first define that combines replicates per condition and labels them
+# Combine replicates and label them
+run_wmr_differential_test <- function(condition1_list,
+         condition2_list,
+         condition1_name,
+         condition2_name) {
+  # Combine replicates and label them
   combine_reps <- function(df_list, condition_name) {
-    dplyr::bind_rows(lapply(seq_along(df_list), function(i) {
-      df_list[[i]] %>% dplyr::mutate(condition = condition_name, replicate = i)
+    bind_rows(lapply(seq_along(df_list), function(i) {
+      df_list[[i]] %>% mutate(condition = condition_name, replicate = i)
     }))
   }
 
-  # combine all replicates
-  all_wmr <- dplyr::bind_rows(
+  # Combine all replicates
+  all_wmr <- bind_rows(
     combine_reps(condition1_list, condition1_name),
     combine_reps(condition2_list, condition2_name)
   )
 
-  # filter all-zero transcripts
+  # Filter out transcripts with all-zero weighted_mod_ratio
   filtered <- all_wmr %>%
-    dplyr::group_by(ensembl_transcript_id) %>%
-    dplyr::filter(any(weighted_mod_ratio > 0)) %>%
+    group_by(ensembl_transcript_id) %>%
+    filter(any(weighted_mod_ratio > 0)) %>%
     ungroup()
 
-  # run Wilcoxon per transcript
+  # Run Wilcoxon per transcript and summarize
   results <- filtered %>%
-    dplyr::group_by(ensembl_transcript_id) %>%
-    dplyr::group_modify(~ {
+    group_by(
+      ensembl_transcript_name,
+      ensembl_transcript_id,
+      ensembl_gene_id,
+      ensembl_gene_name,
+      gene_biotype,
+      transcript_length
+    ) %>%
+    group_modify( ~ {
+      # Skip transcripts without both conditions
+      if (length(unique(.x$condition)) < 2) {
+        return(
+          tibble(
+            median_wmr_condition1 = NA,
+            median_wmr_condition2 = NA,
+            median_diff = NA,
+            p_value = NA
+          )
+        )
+      }
 
-      # Skip transcripts that do not have measurements in both conditions
-      if (length(unique(.x$condition)) < 2)
-        return(tibble::tibble(median_diff = NA, p_value = NA))
+      median_c1 <-
+        median(.x$weighted_mod_ratio[.x$condition == condition1_name])
+      median_c2 <-
+        median(.x$weighted_mod_ratio[.x$condition == condition2_name])
+      wt <-
+        wilcox.test(weighted_mod_ratio ~ condition,
+                    data = .x,
+                    exact = FALSE)
 
-      # Perform Wilcoxon rank-sum test comparing WMR between conditions
-      # exact = FALSE avoids errors when there are ties or small sample sizes
-      wt <- stats::wilcox.test(weighted_mod_ratio ~ condition, data = .x, exact = FALSE)
-
-      # Compute effect size: median difference (condition2 − condition1)
-      tibble::tibble(
-        median_diff =
-          median(.x$weighted_mod_ratio[.x$condition == condition2_name]) -
-          median(.x$weighted_mod_ratio[.x$condition == condition1_name]),
+      tibble(
+        median_wmr_condition1 = median_c1,
+        median_wmr_condition2 = median_c2,
+        median_diff = median_c2 - median_c1,
         p_value = wt$p.value
       )
     }) %>%
@@ -78,4 +96,3 @@ run_wmr_differential_test <- function(
 
   return(results)
 }
-

@@ -25,7 +25,9 @@ columns as \code{condition1_list}.}
 \value{
 A tibble with one row per transcript containing:
 \itemize{
-\item \code{ensembl_transcript_id}
+\item \verb{m6A transcript info}
+\item \verb{median weighted mod ratio for condition 1}
+\item \verb{median weighted mod ratio for condition 2}
 \item \code{median_diff} — median WMR( condition2 – condition1 )
 \item \code{p_value} — Wilcoxon rank-sum test p-value
 }
