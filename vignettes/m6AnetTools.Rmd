@@ -397,6 +397,107 @@ Both output dataframes include a reference to the original m6A sites. In `overla
 
 # Comparative Analysis
 
+Because m6Anet outputs predictions for individual samples, this package adds tools for comparing m6A patterns across conditions. The main capabilities include:
+
+1. Shared vs. condition-specific features: Summaries of common and unique m6A sites, transcripts, and genes between groups.
+2. Differential methylation analysis
+
+    - No replicates: computes a weighted modification ratio for each transcript and compares conditions using a log2 fold-change to highlight transcripts with clear shifts in methylation.
+    - With replicates: runs a Wilcoxon rank-sum test on weighted modification ratios to identify transcripts showing statistically significant hypermethylation in one condition.
+
+3. Integration with differential gene expression: Results can be merged with DE analyses for joint interpretation.
+4. Functional categorization: Transcripts are grouped into six classes reflecting combined methylation and expression behavior (e.g., hypermethylated + upregulated, hypermethylated + unchanged). For each class, the package reports transcript biotypes and m6A site distributions across transcript regions, providing structured biological context.
+
+## Comparing m6A Distributions Across Samples
+
+Understanding how m6A sites, transcripts, or genes differ between samples is often the first step in comparative methylation analysis. The compare_m6a_distribution() function provides a simple way to quantify shared and unique features across two or more groups.
+
+This function takes a **named list**, where each element contains a vector of m6A site IDs, transcript IDs, or gene IDs for each condition. It returns a structured summary of overlaps and differences, including:
+
+- Unique elements per group
+- Pairwise intersections: shared elements between every pair of groups
+- Common elements across all groups
+- For exactly 3 groups, the function also reports elements that are shared by two groups but absent from the third.
+
+```{r compare-m6a}
+# Comparing the m6A distribution between IGF2BP2 KD and Naive
+
+# Load IGF2BP2 data
+data("example_m6A_igf_gli36_cells")
+
+# Create m6A site list
+example_m6A_igf_gli36_cells$site <- paste(example_m6A_igf_gli36_cells$ensembl_transcript_id, example_m6A_igf_gli36_cells$transcript_position, sep = "_") # creates a unique site identifier
+
+example_m6A_naive_gli36_cells$site <-  paste(example_m6A_naive_gli36_cells$ensembl_transcript_id, example_m6A_naive_gli36_cells$transcript_position, sep = "_")
+
+site_list <- list(igf = unique(example_m6A_igf_gli36_cells$site),
+                  naive = unique(example_m6A_naive_gli36_cells$site))
+
+# Create m6A transcript list
+tx_list <- list(igf = unique(example_m6A_igf_gli36_cells$ensembl_transcript_name),
+                  naive = unique(example_m6A_naive_gli36_cells$ensembl_transcript_name))
+
+# Create m6A gene list
+gene_list <- list(igf = unique(example_m6A_igf_gli36_cells$ensembl_gene_name),
+                  naive = unique(example_m6A_naive_gli36_cells$ensembl_gene_name))
+
+# Run function
+#common_unique_sites <- compare_m6a_distribution(site_list)
+#common_unique_tx <- compare_m6a_distribution(tx_list)
+common_unique_genes <- compare_m6a_distribution(gene_list)
+
+# Distribution values
+attr(common_unique_genes, "summary")
+
+# Show common sites
+common_unique_genes$common_all
+```
+
+## Differential Methylation (No Replicates)
+
+Using the weighted modification ratios produced by calculate_weighted_mod_ratio(), this function merges two transcript-level data frames, keeps only transcripts present in both groups, and computes the log2 fold change in weighted modification ratio. Although observational, this metric highlights transcripts that appear hypermethylated in one condition relative to the other. This is especially useful when integrating methylation changes with gene expression to identify regulatory patterns across conditions.
+
+The inputs of this function are the dataframes for Group 1 and Group 2 that contain the `weighted_mod_ratio` column. 
+
+> **Note:** If you plan to run **Differential Methylation and Gene Expression**, make sure to run `map_relative_tx_regions_to_m6a()` before `calculate_weighted_mod_ratio()`. This ensures transcript-region annotations are included in the downstream dataframes.
+
+This function returns a merged dataframe containing:
+
+- Core m6A transcript data (transcript ID, gene ID, length, biotype)
+- Weighted modification ratios (WMR) for each condition
+- The log2 fold change of the WMR, using condition 1 as the numerator.
+
+    - Positive values indicate higher methylation in condition 1
+    - Negative values indicate higher methylation in condition 2
+
+```{r wmr}
+# Load example dataframes with the weighted modification ratio calculations
+data("naive_gli36_cells_wmr")
+data("igf_gli36_cells_wmr")
+
+# Show first few lines
+head(naive_gli36_cells_wmr)
+
+# Run function
+logfc_wmr_igf_vs_naive <- log2fc_weighted_mod_ratio(group1_df = igf_gli36_cells_wmr, # IGF set as condition 1
+                                                    group2_df = naive_gli36_cells_wmr) # Naive set as condition 2
+
+head(logfc_wmr_igf_vs_naive)
+```
+
+From the first few lines of the output, we notice that these specific transcripts are positive and therefore hypermethylated in the IGF2BP2 KD condition compared to the Naive.
+
+## Differential Methylation (With Replicates)
+If you study contains replicates, you can use this function to conduct a Wilcoxin Signed-Rank Test to statistically validate whether a transcript is hypermethylated in one group vs the other. For this analysis, make sure you have the weighted modification ratio results from the **unfiltered** m6A dataframe with transcript regions if you choose. Unlike the previous function, this function requires raw unfiltered m6A sites in order to ... 
+
+This function will undergo the following key steps:
+
+1. 
+
+## Differential Methylation and Gene Expression
+
+## Summary of Methylation and Expression
+
 # Combined Functions (Part 1 & 2)
 
 
