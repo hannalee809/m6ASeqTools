@@ -2,12 +2,15 @@
 % Please edit documentation in R/weighted_mod_ratio_and_DGE.R
 \name{weighted_mod_ratio_and_DGE}
 \alias{weighted_mod_ratio_and_DGE}
-\title{Plot Weighted Modification Ratio vs. Differential Gene Expression}
+\title{Weighted Modification Ratio vs Differential Gene Expression Plot}
 \usage{
 weighted_mod_ratio_and_DGE(
-  log2df,
+  wmr_df,
   deseq,
-  gene_col = "ensembl_gene_id",
+  input_type = c("log2fc_wmr", "wmr_diff"),
+  wmr_gene_col = "ensembl_gene_id",
+  wmr_sig = list(p_val = NULL, diff = NULL),
+  deseq_gene_col = "ensembl_gene_id",
   log2fc_col = "log2FoldChange",
   padj_col = "padj",
   group1_name = "Group1",
@@ -15,33 +18,74 @@ weighted_mod_ratio_and_DGE(
 )
 }
 \arguments{
-\item{log2df}{A data frame containing weighted modification ratios with a column named \code{log2fc_weighted_mod_ratio}}
+\item{wmr_df}{Data frame containing weighted modification ratio metrics.
+Must include either \code{log2fc_weighted_mod_ratio} or
+\code{median_diff} depending on \code{input_type}.}
 
-\item{deseq}{A DESeq2 results data frame with log2 fold changes and adjusted p-values}
+\item{deseq}{DESeq2 results data frame containing gene-level differential
+expression statistics.}
 
-\item{gene_col}{Character. Column name in \code{deseq} containing gene IDs (default: "ensembl_gene_id")}
+\item{input_type}{Character. Choose either:
+\itemize{
+\item \code{"log2fc_wmr"} – use log2FC of weighted mod ratio.
+\item \code{"wmr_diff"} – use median WMR difference.
+}}
 
-\item{log2fc_col}{Character. Column name in \code{deseq} for log2 fold change values (default: "log2FoldChange")}
+\item{wmr_gene_col}{Column name in \code{wmr_df} storing gene IDs.}
 
-\item{padj_col}{Character. Column name in \code{deseq} for adjusted p-values (default: "padj")}
+\item{wmr_sig}{List specifying optional WMR significance thresholds for
+\verb{input_type = "wmr_diff}:
+\itemize{
+\item \code{p_val}: p-value cutoff for WMR significance.
+\item \code{diff}: minimum absolute log2FC or median difference.
+}
+Use \code{NULL} to disable a criterion.}
 
-\item{group1_name}{Character. Name of the experimental group (used in plot title and axis labels)}
+\item{deseq_gene_col}{Column name in \code{deseq} storing gene IDs.}
 
-\item{group2_name}{Character. Name of the control group (used in plot title and axis labels)}
+\item{log2fc_col}{Column name in \code{deseq} for gene log2 fold change.}
+
+\item{padj_col}{Column name in \code{deseq} for adjusted p-values.}
+
+\item{group1_name}{Name of condition/group 1 (used in labels).}
+
+\item{group2_name}{Name of condition/group 2 (used in labels).}
 }
 \value{
 A list containing:
 \describe{
-\item{plot}{A \code{ggplot2} object comparing weighted mod ratio and gene expression}
-\item{data}{The merged data frame used to generate the plot}
+\item{plot}{A ggplot2 scatter plot.}
+\item{data}{Merged data frame containing WMR + DGE values.}
 }
 }
 \description{
-This function merges transcript-level weighted modification ratio data with differential gene expression results
-and generates a scatter plot comparing the two, highlighting significantly differentially expressed genes.
+This function merges weighted modification ratio (WMR) results with DESeq2
+differential gene expression results and generates a scatter plot comparing
+WMR changes to gene-level log2 fold changes. Users can either input the
+results from \code{log2fc_weighted_mod_ratio} or \code{run_wmr_differential_test},
+which they specify in the function argument. Users may specify significance
+thresholds for WMR if they used the differential test. (p-value and/or
+median/log2FC difference), which highlight points in blue Genes significant
+in both WMR and DGE are highlighted in purple.
+}
+\details{
+Significance coloring:
+\itemize{
+\item Purple = significant in both WMR and DGE.
+\item Red = DGE only.
+\item Blue = WMR only.
+\item Black = not significant.
+}
+
+DGE significance is defined as:
+\code{|log2FC| > 0.58} and \code{padj < 0.05}.
 }
 \examples{
-m6a_DGE_A_vs_B <- weighted_mod_ratio_and_DGE(log2df, deseq, group1_name="A", group2_name="B")
-df <- m6a_DGE_A_vs_B$data
-df <- m6a_DGE_A_vs_B$plot
+weighted_mod_ratio_and_DGE_NEW(
+  wmr_df,
+  deseq_results,
+  input_type = "wmr_diff",
+  wmr_sig = list(p_val = 0.05, diff = 0.2)
+)
+
 }

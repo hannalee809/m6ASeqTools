@@ -12,10 +12,10 @@ log2fc_weighted_mod_ratio(
 )
 }
 \arguments{
-\item{group1_df}{Data frame for Group 1 (experimental), must include
+\item{group1_df}{Data frame for Group 1 (CONTROL), must include
 \code{weighted_mod_ratio}}
 
-\item{group2_df}{Data frame for Group 2 (control), must include
+\item{group2_df}{Data frame for Group 2 (EXPERIMENTAL), must include
 \code{weighted_mod_ratio}}
 
 \item{group1_name}{Name of Group 1 (used as suffix in output columns)}
