@@ -3,9 +3,9 @@
 #' Merges two data frames on commonly modified transcripts and calculates the
 #' log2 fold change of the weighted modification ratio between groups.
 #'
-#' @param group1_df Data frame for Group 1 (experimental), must include
+#' @param group1_df Data frame for Group 1 (CONTROL), must include
 #'   `weighted_mod_ratio`
-#' @param group2_df Data frame for Group 2 (control), must include
+#' @param group2_df Data frame for Group 2 (EXPERIMENTAL), must include
 #'   `weighted_mod_ratio`
 #' @param group1_name Name of Group 1 (used as suffix in output columns)
 #' @param group2_name Name of Group 2 (used as suffix in output columns)
@@ -26,11 +26,11 @@ log2fc_weighted_mod_ratio <- function(group1_df, group2_df,
   )
 
   # Dynamically compute log2FC using the column names
-  col1 <- paste0("weighted_mod_ratio.", group1_name)
-  col2 <- paste0("weighted_mod_ratio.", group2_name)
+  col1 <- paste0("weighted_mod_ratio.", group1_name) # control
+  col2 <- paste0("weighted_mod_ratio.", group2_name) # experimental
 
   # Avoid divide-by-zero or NaN by adding a small pseudocount if needed
-  common_df$log2fc_weighted_mod_ratio <- log2((common_df[[col1]] + 1e-6) / (common_df[[col2]] + 1e-6))
+  common_df$log2fc_weighted_mod_ratio <- log2((common_df[[col2]] + 1e-6) / (common_df[[col1]] + 1e-6))
 
   return(common_df)
 }

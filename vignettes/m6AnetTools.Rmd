@@ -488,13 +488,91 @@ head(logfc_wmr_igf_vs_naive)
 From the first few lines of the output, we notice that these specific transcripts are positive and therefore hypermethylated in the IGF2BP2 KD condition compared to the Naive.
 
 ## Differential Methylation (With Replicates)
-If you study contains replicates, you can use this function to conduct a Wilcoxin Signed-Rank Test to statistically validate whether a transcript is hypermethylated in one group vs the other. For this analysis, make sure you have the weighted modification ratio results from the **unfiltered** m6A dataframe with transcript regions if you choose. Unlike the previous function, this function requires raw unfiltered m6A sites in order to ... 
+If your study includes replicates, this function performs a Wilcoxon rank-sum test to assess whether a transcript shows higher or lower methylation between two conditions. Use the raw, unfiltered m6A site-level data so that all potential modification sites are represented. This ensures accurate aggregation and avoids bias introduced by pre-filtering.
 
 This function will undergo the following key steps:
 
-1. 
+1. Combining replicates for each condition
+2. Filtering out transcripts with zero WMR across all replicates
+3. Calculating per-transcript median WMR for each condition
+4. Running a Wilcoxon rank-sum test between conditions
+5. Returning transcript metadata and differential statistics
+
+You must provide two lists:
+
+- `condition1_list`: list of data frames for condition 1
+- `condition2_list`: list of data frames for condition 2
+
+Each data frame must include these columns:
+
+- `ensembl_transcript_name`
+- `ensembl_transcript_id`
+- `ensembl_gene_id`
+- `ensembl_gene_name`
+- `gene_biotype`
+- `transcript_length`
+- `weighted_mod_ratio`
+
+```{r run_differential_test, eval=F}
+# Define lists
+naive_list <- list(naive1_wmr, naive2_wmr, naive3_wmr)
+igf_list <- list(igf1_wmr, igf2_wmr, igf3_wmr)
+
+# Function call
+results <- run_wmr_differential_test(
+condition1_list = naive_list,
+condition2_list = igf_list,
+condition1_name = "naive",
+condition2_name = "IGF"
+)
+```
+
+The output of this function is a data frame containing one row per transcript with
+
+- Transcript metadata
+- `median_wmr_condition1`
+- `median_wmr_condition2`
+- `median_diff` (condition2 − condition1). A positive `median_diff` means higher median WMR in the second condition.
+- `p_value` from Wilcoxon test. Low `p_value` indicates statistical significance.
+
+```{r wilcox_output, echo=FALSE}
+knitr::kable(
+data.frame(
+ensembl_transcript_name = c("JKAMP-213", "PHPT1-204"),
+ensembl_transcript_id = c("ENST00000602482.5", "ENST00000463215.1"),
+ensembl_gene_id = c("ENSG00000050130.18", "ENSG00000054148.18"),
+ensembl_gene_name = c("JKAMP", "PHPT1"),
+gene_biotype = c("retained_intron", "protein_coding_CDS_not_defined"),
+transcript_length = c("2302", "627"),
+median_wmr_condition1 = c("0.0011716045", "0.0001362911"),
+median_wmr_condition2 = c("0", "0"),
+median_diff = c("-1.171604e-03", "-1.362911e-04"),
+p_value = c("0.0765225", "0.0765225")),
+align="l", 
+caption = "Example output from run_wmr_differential_test()"
+) %>% 
+  kable_styling(
+    font_size = 10,
+    full_width = FALSE
+  )
+```
 
 ## Differential Methylation and Gene Expression
+
+After running the differential methylation analysis (either with or without replicates), you can incorporate differential gene expression results (i.e. DESeq2) to determine these 6 clusters of m6A and expression.
+
+1. Hypermethylated in Condition 1, Upregulated in Condition 1
+2. Hypermethylated in Condition 2, Upregulated in Condition 2
+3. Hypermethylated in Condition 1, Upregulated in Condition 2
+4. Hypermethylated in Condition 2, Upregulated in Condition 1
+5. Hypermethylated in Condition 1, No significant change in gene expression
+6. Hypermethylated in Condition 2, No significant change in gene expression
+
+This function can be run with either the output from `log2fc_weighted_mod_ratio()` or `run_wmr_differential_test()`, just the arguments will differ depending on which one you use. 
+
+**For a study with no replicates:**
+
+
 
 ## Summary of Methylation and Expression
 

@@ -8,8 +8,8 @@
 #' @param gene_col Character. Column name in `deseq` containing gene IDs (default: "ensembl_gene_id")
 #' @param log2fc_col Character. Column name in `deseq` for log2 fold change values (default: "log2FoldChange")
 #' @param padj_col Character. Column name in `deseq` for adjusted p-values (default: "padj")
-#' @param group1_name Character. Name of the experimental group (used in plot title and axis labels)
-#' @param group2_name Character. Name of the control group (used in plot title and axis labels)
+#' @param group1_name Character. Name of the CONTROL group
+#' @param group2_name Character. Name of the EXPERIMENTAL group
 #'
 #' @return A list containing:
 #' \describe{

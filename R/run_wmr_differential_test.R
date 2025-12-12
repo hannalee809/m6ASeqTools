@@ -6,9 +6,9 @@
 #' two conditions.
 #'
 #' @param condition1_list A list of data frames for condition 1. Each must contain
-#'   `ensembl_transcript_id` and `weighted_mod_ratio`.
+#'   `ensembl_transcript_id` and `weighted_mod_ratio`. This is the CONTROL group.
 #' @param condition2_list A list of data frames for condition 2. Same required
-#'   columns as `condition1_list`.
+#'   columns as `condition1_list`. This is the EXPERIMENTAL group.
 #' @param condition1_name A string naming condition 1.
 #' @param condition2_name A string naming condition 2.
 #'
