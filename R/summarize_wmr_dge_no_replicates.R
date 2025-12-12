@@ -14,7 +14,7 @@
 #' @return A list containing filtered data frames and summaries
 #' @export
 
-summarize_weighted_mod_ratio_and_DGE <- function(df,
+summarize_wmr_dge_no_replicates <- function(df,
                                                  group1_name = "Group1",
                                                  group2_name = "Group2",
                                                  log2FC_dge,

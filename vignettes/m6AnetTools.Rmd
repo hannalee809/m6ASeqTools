@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output:
    rmarkdown::html_document:
     toc: true
-    toc_depth: 2 
+    toc_depth: 3
     toc_float: true
     theme: flatly
 vignette: >
@@ -195,7 +195,7 @@ align="l"
 knitr::include_graphics("Transcript_Region_Density_naive.png")
 ```
 
-## Chromosomal Annotation and Distribution
+## Chromosomal Annotation
 This function assigns each m6A site to its chromosome using human gene annotations from org.Hs.eg.db. Provide the m6A dataframe and optionally specify whether the results should be saved as a CSV and whether a chromosomal distribution plot should be generated.
 
 ```{r chr-dist, eval=FALSE}
@@ -208,7 +208,7 @@ calculate_chromosome_location(filtered_m6A_naive_gli36_cells,
 knitr::include_graphics("naive_chr_distribution.png")
 ```
 
-## Weighted Modification Ratio Calculation
+## Weighted Modification Ratio
 This metric summarizes transcript-level methylation by combining the number of modified sites, their modification ratios, and transcript length. You can either input the m6a dataframe or the annotated output from map_relative_tx_regions_to_m6A(), as this will provide a regional summary in addition to the weighted modificaition ratio calculation.
 
 The **weighted modification ratio** per transcript is defined as:
@@ -257,7 +257,7 @@ knitr::kable(
 # Incorporating External Annotations
 This part of the package provides tools to convert m6Anet transcript-based coordinates into genomic coordinates using GTF annotations. The resulting genomic positions can be exported as a BED file, enabling direct visualization of m6A sites in genome browsers such as IGV or UCSC Genome Browser. In addition, a secondary function allows users to annotate their m6A BED file with any user-provided BED datasets, making it easy to integrate external features such as RBP peaks, miRNA binding sites, SNPs, or other genomic intervals.
 
-## Converting m6Anet Transcript Coordinates to Genomic Coordinates and Creating BED Files:
+## Convert to Genomic Coordinates and Create BED Files
 m6Anet reports modification sites using transcript-based positions, which cannot be directly viewed in genome browsers. To enable genomic visualization and downstream annotation, the package includes a function that:
 
 - maps transcript positions to genomic coordinates using a user-provided GTF annotation
@@ -316,7 +316,7 @@ This figure shows an example of m6A visualization in IGV using the generated bed
 knitr::include_graphics("naive_m6a_igv_chr17.png")
 ```
 
-## Annotating m6A Sites with External Genomic Features
+## Annotate m6A with External Genomic Features
 
 This section demonstrates how to annotate m6A sites using user-provided genomic feature files (e.g., RBP binding sites, miRNA targets, SNPs, enhancers, promoters). The annotate_m6A_overlaps() function accepts any BED-like table as long as genomic coordinates and a feature column are supplied.
 
@@ -408,7 +408,7 @@ Because m6Anet outputs predictions for individual samples, this package adds too
 3. Integration with differential gene expression: Results can be merged with DE analyses for joint interpretation.
 4. Functional categorization: Transcripts are grouped into six classes reflecting combined methylation and expression behavior (e.g., hypermethylated + upregulated, hypermethylated + unchanged). For each class, the package reports transcript biotypes and m6A site distributions across transcript regions, providing structured biological context.
 
-## Comparing m6A Distributions Across Samples
+## Compare m6A Distributions
 
 Understanding how m6A sites, transcripts, or genes differ between samples is often the first step in comparative methylation analysis. The compare_m6a_distribution() function provides a simple way to quantify shared and unique features across two or more groups.
 
@@ -453,7 +453,9 @@ attr(common_unique_genes, "summary")
 common_unique_genes$common_all
 ```
 
-## Differential Methylation (No Replicates)
+## Differential Methylation
+
+### No Replicates
 
 Using the weighted modification ratios produced by calculate_weighted_mod_ratio(), this function merges two transcript-level data frames, keeps only transcripts present in both groups, and computes the log2 fold change in weighted modification ratio. Although observational, this metric highlights transcripts that appear hypermethylated in one condition relative to the other. This is especially useful when integrating methylation changes with gene expression to identify regulatory patterns across conditions.
 
@@ -487,7 +489,7 @@ head(logfc_wmr_igf_vs_naive)
 
 From the first few lines of the output, we notice that these specific transcripts are positive and therefore hypermethylated in the IGF2BP2 KD condition compared to the Naive.
 
-## Differential Methylation (With Replicates)
+### With Replicates
 If your study includes replicates, this function performs a Wilcoxon rank-sum test to assess whether a transcript shows higher or lower methylation between two conditions. Use the raw, unfiltered m6A site-level data so that all potential modification sites are represented. This ensures accurate aggregation and avoids bias introduced by pre-filtering.
 
 This function will undergo the following key steps:
@@ -557,9 +559,117 @@ caption = "Example output from run_wmr_differential_test()"
   )
 ```
 
-## Differential Methylation and Gene Expression
+## Methylation and Gene Expression
 
-After running the differential methylation analysis (either with or without replicates), you can incorporate differential gene expression results (i.e. DESeq2) to determine these 6 clusters of m6A and expression.
+After performing differential methylation analysis, it is often informative to integrate these results with **differential gene expression (DGE)** results (e.g., from DESeq2) to see how methylation changes relate to gene-level expression changes. The function `weighted_mod_ratio_and_DGE_NEW()` facilitates this integration and visualization.
+
+This function can handle **two types of WMR inputs**:
+
+1. Output from `log2fc_weighted_mod_ratio()` (no replicates)
+2. Output from `run_wmr_differential_test()` (with replicates)
+
+### No Replicates
+
+- Use the output from `log2fc_weighted_mod_ratio()`, which contains the column `log2fc_weighted_mod_ratio`.
+- Provide the DESeq2 results as a separate data frame. This should include:
+
+    - Gene ID column
+    - Log2 fold change column
+    - Adjusted p-value column
+
+**Important:** Both `log2fc_weighted_mod_ratio()` and DESeq2 treat **group 2 as experimental** and **group 1 as control**, so ensure these match when integrating results.
+
+- Set `input_type = "log2fc_wmr"` to indicate this type of input.
+- Specify the gene ID column names for both the WMR and DESeq2 data frames so the function can merge them correctly.
+- Specify the log2FC and p-value column names in your DESeq2 results.
+
+```{r wmr-dge-no-replicates}
+# View output of log2fc weighted mod ratio
+head(logfc_wmr_igf_vs_naive)
+
+# Load DESeq output
+data("igf_vs_naive_DGE_filt")
+head(igf_vs_naive_DGE_filt)
+
+# Run function
+log2wmr_dge_igf_naive_results <-
+  weighted_mod_ratio_and_DGE(
+    wmr_df = logfc_wmr_igf_vs_naive,
+    deseq = igf_vs_naive_DGE_filt,
+    input_type = "log2fc_wmr",
+    deseq_gene_col = "ensembl_gene_id_version",
+    log2fc_col = "igf_vs_naive_log2FC",
+    padj_col = "pvalue_igf_vs_naive",
+    group1_name = "NAIVE", # Control group
+    group2_name = "IGF" # Experimental group
+  )
+
+# Show plot
+log2wmr_dge_igf_naive_results$plot
+
+# Show merged dataframes
+head(log2wmr_dge_igf_naive_results$data)
+```
+
+From this output, we can see that these transcripts are more methylated in the Naive (Gli36) condition compared to IGF2BP2 KD. However, only one gene is significantly differentially expressed, and it is upregulated in the IGF2BP2 KD condition, suggesting that methylation changes do not necessarily correspond directly to expression changes for most genes.
+
+### With Replicates
+If your study includes replicates, use the output from run_wmr_differential_test() as the WMR input. Provide the DESeq2 results as a separate data frame, and set input_type = "wmr_diff" to indicate that the input contains median differences from the WMR analysis.
+
+Inputs:
+
+- wmr_df: output from run_wmr_differential_test()
+- deseq: DESeq2 results with gene IDs, log2 fold changes, and adjusted p-values
+- Optional WMR significance thresholds (wmr_sig), including:
+
+    - p_val: p-value cutoff for WMR significance
+    - diff: minimum median difference threshold
+
+Outputs:
+
+- data: merged data frame with median WMR differences and DGE statistics
+- plot: scatter plot with:
+
+    - X-axis: median difference in weighted modification ratio
+    - Y-axis: gene log2 fold change
+
+Points are colored by significance:
+
+- Purple: significant in both WMR and DGE
+- Red: DGE only
+- Green: WMR only
+- Black: not significant
+
+This allows you to visualize how changes in methylation correspond to gene expression, highlighting transcripts with significant differences in either or both measures.
+
+```{r wmr-dge-with-replicates, eval=FALSE}
+diff_test_dge <-
+  weighted_mod_ratio_and_DGE(
+    # results from differential test
+    wmr_df = diff_test_igf_naive_filt,
+    deseq = igf_vs_naive_DGE,
+    # set to wmr_diff
+    input_type = "wmr_diff",
+    # set cut off for significance if wanted
+    wmr_sig = list(diff = 0.002),
+    deseq_gene_col = "ensembl_gene_id_version",
+    log2fc_col = "igf_vs_naive_log2FC",
+    padj_col = "pvalue_igf_vs_naive",
+    group1_name = "NAIVE",
+    group2_name = "IGF"
+  )
+```
+
+```{r wmr-dge-plot, echo=FALSE, out.width="80%", out.height="400px", fig.cap="Differential expression plot"}
+knitr::include_graphics("diff_test_dge_plot.pdf")
+```
+
+## Summarize Methylation and Expression
+
+
+
+
+to determine these 6 clusters of m6A and expression.
 
 1. Hypermethylated in Condition 1, Upregulated in Condition 1
 2. Hypermethylated in Condition 2, Upregulated in Condition 2
@@ -568,13 +678,6 @@ After running the differential methylation analysis (either with or without repl
 5. Hypermethylated in Condition 1, No significant change in gene expression
 6. Hypermethylated in Condition 2, No significant change in gene expression
 
-This function can be run with either the output from `log2fc_weighted_mod_ratio()` or `run_wmr_differential_test()`, just the arguments will differ depending on which one you use. 
-
-**For a study with no replicates:**
-
-
-
-## Summary of Methylation and Expression
 
 # Combined Functions (Part 1 & 2)
 
