@@ -483,8 +483,8 @@ head(naive_gli36_cells_wmr)
 # Run function
 logfc_wmr_igf_vs_naive <- log2fc_weighted_mod_ratio(group1_df = igf_gli36_cells_wmr, # IGF set as condition 1
                                                     group2_df = naive_gli36_cells_wmr, # Naive set as condition 2
-                                                    group1_name = "IGF",
-                                                    group2_name = "Naive")
+                                                    group1_name = "NAIVE",
+                                                    group2_name = "IGF")
 
 head(logfc_wmr_igf_vs_naive)
 ```
@@ -778,10 +778,147 @@ For each category, it returns:
 1. Filtered transcript list
 2. Biotype summary: Number and frequency of each gene biotype
 
-# Combined Functions (Part 1 & 2)s
+```{r summarize-diff-test-dge-output, echo = FALSE}
+knitr::kable(
+data.frame(
+gene_biotype = c("protein_coding", "retained_intron"),
+count = c("4", "21"),
+frequency = c("0.0112540193", "0.0862808146"),
+group = c("noDGE_not_sig_hyperm6A_group1", "noDGE_not_sig_hyperm6A_group1")),
+align="l", 
+caption = "Example biotype summary from run_wmr_differential_test()"
+)
+```
 
 
+# Combined Functions (Part 1 & 2)
 
+## Part 1: m6Anet Post-Processing
 
+The function `m6A_seq_part1()` automates the core preprocessing and annotation steps of the m6ASeqTools pipeline, starting from m6Anet site-level predictions and ending with weighted modification ratios per transcript. This function is intended as the first step in downstream differential methylation analyses.
 
+It performs quality control, site filtering, transcript region annotation, chromosome localization, and weighted modification ratio (WMR) calculation in a single, reproducible workflow.
+
+**When to Use This Function**
+
+Use m6A_seq_part1() after running m6Anet and before any differential methylation or integration with gene expression analyses. The output of this function serves as the input for any further comparative analysis.
+
+**Inputs**
+
+The function requires:
+
+- `m6Aout`: Site-level m6Anet output (e.g., data.site_proba.csv)
+- `gtf_path`: Path to a transcript annotation GTF file (e.g., GENCODE)
+- `output_directory`: Directory where all results will be written
+- `mod_ratio_df`: A string identifier used to label output files and objects
+- `probability`: Minimum modification probability threshold for high-confidence m6A sites (default = 0.9)
+
+What the Function Does
+
+m6A_seq_part1() executes the following steps automatically:
+
+1. **Quality Control Summary** (`summarize_m6anet_output()`): Generates an HTML QC report summarizing m6Anet predictions.
+2. **High-Confidence Site Filtering** (`filter_m6a_sites()`): Filters m6A sites based on the specified modification probability threshold.
+3. **Transcript Region Annotation** (`get_transcript_region_lengths()` and `map_relative_tx_regions_to_m6A()`): Extracts transcript region lengths (5′UTR, CDS, 3′UTR) from the GTF file and maps filtered m6A sites to relative transcript positions.
+4. **Transcript Region Density Visualization** (`plot_relative_positions()`): Produces a PDF showing the distribution of m6A sites across transcript regions.
+5. **Chromosome Location Annotation** (`calculate_chromosome_location()`): Annotates and visualizes the chromosomal distribution of filtered m6A sites.
+6. **Weighted Modification Ratio Calculation** (`calculate_weighted_mod_ratio()`): Computes transcript-level weighted modification ratios using region-aware site aggregation.
+
+**Outputs**
+
+The function writes multiple files to output_directory, including:
+
+- QC report (.html)
+- Filtered m6A site table (.csv)
+- Transcript region annotations (.csv)
+- Relative transcript position mapping (.csv)
+- Transcript region density plot (.pdf)
+- Chromosome location summary and plot (.csv, .pdf)
+- Weighted modification ratio table (.csv)
+    
+    - For convenience, the weighted modification ratio data frame is also assigned to the global environment as: `weighted_mod_ratio_<mod_ratio_df>`
+
+**Example Usage**
+```{r m6a_part1, eval=FALSE}
+m6A_seq_part1(
+  m6Aout = data.site_proba,
+  gtf_path = "gencode.v44.annotation.gtf",
+  output_directory = "m6ASeqTools_output",
+  mod_ratio_df = "Naive_Rep1",
+  probability = 0.9
+)
+```
+
+## Part 2: Differential m6A Methylation and Gene Expression Integration
+
+The function m6a_seq_part2() performs downstream comparative analysis of m6A methylation between two biological groups and integrates these results with differential gene expression (DGE) data. This function is designed to be run after completing Part 1 of the m6ASeqTools pipeline and is optimized for studies without biological replicates.
+
+It calculates transcript-level methylation differences, integrates gene expression changes, generates visualization outputs, and summarizes biological patterns across functional clusters.
+
+**When to Use This Function**
+
+Use m6a_seq_part2() once you have:
+
+- Transcript-level weighted modification ratios for two groups
+- Differential gene expression results (e.g., from DESeq2)
+
+**Inputs**
+
+The function requires the following inputs:
+
+- `g1_df` / `g2_df`: Weighted modification ratio outputs for group 1 and group 2 (from `m6A_seq_part1()`)
+- `group1_name` / `group2_name`: Labels for the two comparison groups
+- `deseq`: DESeq2 results data frame containing Gene ID, log2 fold change, adjusted p-value
+
+    - set names for `gene_col`, `log2fc_col`, and `padj_col`
+
+- `vec_list` (optional): A named list of m6A sites, transcripts, or genes used to compare overall m6A distributions across groups
+- `output_dir`: Directory where all results will be saved
+
+**Analysis Steps Performed**
+
+`m6a_seq_part2()` runs the following steps automatically:
+
+1. **Optional m6A Distribution** Comparison (`compare_m6a_distribution()`): If vec_list is provided, the function compares global m6A distributions across groups and saves a summary table.
+
+2. **Weighted Modification Ratio Fold Change** (`log2fc_weighted_mod_ratio()`): Calculates the log2 fold change of weighted modification ratios between groups using log2fc_weighted_mod_ratio().
+
+3. **Integration with Differential Gene Expression** (`weighted_mod_ratio_and_DGE()`): Merges methylation changes with DESeq2 results and generates a scatter plot comparing:
+
+- X-axis: log2FC of weighted modification ratio
+- Y-axis: gene expression log2FC
+
+4. **Cluster-Based Functional Summaries** (`summarize_wmr_dge_no_replicates()`): Transcripts are grouped based on expression direction, methylation direction, and statistical significance.
+For each cluster, the function summarizes:
+
+- Gene biotype composition
+- Transcript region m6A site distribution
+
+**Outputs**
+
+All results are written to output_dir, including:
+
+- compare_m6A_distribution.csv (if vec_list is provided)
+- log2fc_weighted_mod_ratio.csv
+- weighted_mod_ratio_and_DGE.csv
+- weighted_mod_ratio_and_DGE_plot.pdf
+- summarized_weighted_mod_ratio_and_DGE_biotype_summary.csv
+- summarized_weighted_mod_ratio_and_DGE_region_summary.csv
+- summarized_weighted_mod_ratio_and_DGE_groups.txt
+
+**Example Usage**
+```{r m6a-seq-part2, eval=FALSE}
+m6a_seq_part2(
+  vec_list = NULL,
+  g1_df = weighted_mod_ratio_Naive,
+  g2_df = weighted_mod_ratio_IGF2BP2_KD,
+  group1_name = "Naive",
+  group2_name = "IGF2BP2_KD",
+  deseq = deseq_results,
+  gene_col = "ensembl_gene_id",
+  log2fc_col = "log2FoldChange",
+  padj_col = "padj",
+  output_dir = "m6ASeqTools_Part2"
+)
+```
 

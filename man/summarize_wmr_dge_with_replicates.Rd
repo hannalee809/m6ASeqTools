@@ -9,7 +9,7 @@ summarize_wmr_dge_with_replicates(
   group1_name = "Group1",
   group2_name = "Group2",
   log2FC_dge,
-  log2fc_wmr = "median_diff",
+  diff_wmr = "median_diff",
   dge_sig = "dge_sig",
   wmr_sig = "wmr_sig"
 )
@@ -25,7 +25,9 @@ summarize_wmr_dge_with_replicates(
 
 \item{diff_wmr}{Column name for the calculated difference in median weighted mod ratios}
 
-\item{sig_col}{Column name for significance boolean (e.g., adjusted p < 0.05)}
+\item{dge_sig}{Column name for gene log2fc significance boolean (e.g., adjusted p < 0.05)}
+
+\item{wmr_sig}{Column name for differential test significance boolean (e.g., adjusted p < 0.05)}
 }
 \value{
 A list containing filtered data frames and summaries

@@ -27,7 +27,7 @@ summarize_wmr_dge_with_replicates <- function(df,
 
   # Use tidy evaluation to extract columns dynamically
   log2FC_dge <- rlang::sym(log2FC_dge)
-  log2fc_wmr <- rlang::sym(log2fc_wmr)
+  diff_wmr <- rlang::sym(diff_wmr)
   dge_sig <- rlang::sym(dge_sig)
   wmr_sig <- rlang::sym(wmr_sig)
 
@@ -35,12 +35,12 @@ summarize_wmr_dge_with_replicates <- function(df,
 
   # Define filtering rules as expressions
   filters <- list(
-    sig_upreg_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!log2fc_wmr) > 0),
-    sig_upreg_group2_sig_hyperm6a_group1 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!log2fc_wmr) < 0),
-    sig_upreg_sig_hyperm6A_group1        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!log2fc_wmr) < 0),
-    sig_upreg_group1_sig_hyperm6a_group2 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!log2fc_wmr) > 0),
-    noDGE_not_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!log2fc_wmr) > 0),
-    noDGE_not_sig_hyperm6A_group1       = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!log2fc_wmr) < 0)
+    sig_upreg_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!diff_wmr) > 0),
+    sig_upreg_group2_sig_hyperm6a_group1 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!diff_wmr) < 0),
+    sig_upreg_sig_hyperm6A_group1        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!diff_wmr) < 0),
+    sig_upreg_group1_sig_hyperm6a_group2 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!diff_wmr) > 0),
+    noDGE_not_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!diff_wmr) > 0),
+    noDGE_not_sig_hyperm6A_group1       = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!diff_wmr) < 0)
   )
 
   for (name in names(filters)) {

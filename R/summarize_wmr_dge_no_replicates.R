@@ -32,12 +32,12 @@ summarize_wmr_dge_no_replicates <- function(df,
 
   # Define filtering rules as expressions
   filters <- list(
-    upreg_hyperm6A_group1        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) > 0),
-    upreg_group1_hyperm6a_group2 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) < 0),
-    upreg_hyperm6A_group2        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) < 0),
-    upreg_group2_hyperm6a_group1 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) > 0),
-    noDGE_hyperm6A_group1        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) > 0),
-    noDGE_hyperm6A_group2        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) < 0)
+    upreg_hyperm6A_group2        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) > 0),
+    upreg_group2_hyperm6a_group1 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) < 0),
+    upreg_hyperm6A_group1        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) < 0),
+    upreg_group1_hyperm6a_group2 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) > 0),
+    noDGE_hyperm6A_group2        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) > 0),
+    noDGE_hyperm6A_group1        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) < 0)
   )
 
   for (name in names(filters)) {
