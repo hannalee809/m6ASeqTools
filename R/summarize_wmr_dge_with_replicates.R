@@ -17,27 +17,29 @@
 #' @export
 
 summarize_wmr_dge_with_replicates <- function(df,
-                                              group1_name = "Group1",
-                                              group2_name = "Group2",
+                                              group1_name = "Group1", # Control
+                                              group2_name = "Group2", # Experimental
                                               log2FC_dge,
                                               log2fc_wmr = "median_diff",
-                                              sig_col = "significant") {
+                                              dge_sig = "dge_sig",
+                                              wmr_sig = "wmr_sig") {
 
   # Use tidy evaluation to extract columns dynamically
   log2FC_dge <- rlang::sym(log2FC_dge)
   log2fc_wmr <- rlang::sym(log2fc_wmr)
-  sig_col <- rlang::sym(sig_col)
+  dge_sig <- rlang::sym(dge_sig)
+  wmr_sig <- rlang::sym(wmr_sig)
 
   group_list <- list()
 
   # Define filtering rules as expressions
   filters <- list(
-    sig_upreg_sig_hyperm6A_group1        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) > 0),
-    sig_upreg_group1_sig_hyperm6a_group2 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) > 0 & (!!log2fc_wmr) < 0),
-    sig_upreg_sig_hyperm6A_group2        = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) < 0),
-    sig_upreg_group2_sig_hyperm6a_group1 = rlang::expr((!!sig_col) == TRUE  & (!!log2FC_dge) < 0 & (!!log2fc_wmr) > 0),
-    noDGE_not_sig_hyperm6A_group1        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) > 0),
-    noDGE_not_sig_hyperm6A_group2        = rlang::expr((!!sig_col) == FALSE & (!!log2fc_wmr) < 0)
+    sig_upreg_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!log2fc_wmr) > 0),
+    sig_upreg_group2_sig_hyperm6a_group1 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) > 0 & (!!log2fc_wmr) < 0),
+    sig_upreg_sig_hyperm6A_group1        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!log2fc_wmr) < 0),
+    sig_upreg_group1_sig_hyperm6a_group2 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!log2fc_wmr) > 0),
+    noDGE_not_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!log2fc_wmr) > 0),
+    noDGE_not_sig_hyperm6A_group1       = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!log2fc_wmr) < 0)
   )
 
   for (name in names(filters)) {
