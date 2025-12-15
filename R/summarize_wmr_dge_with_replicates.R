@@ -8,7 +8,8 @@
 #' @param group2_name Name for group 2
 #' @param log2FC_dge Column name for log2 fold change (DGE)
 #' @param diff_wmr Column name for the calculated difference in median weighted mod ratios
-#' @param sig_col Column name for significance boolean (e.g., adjusted p < 0.05)
+#' @param dge_sig Column name for gene log2fc significance boolean (e.g., adjusted p < 0.05)
+#' @param wmr_sig Column name for differential test significance boolean (e.g., adjusted p < 0.05)
 #'
 #' @importFrom dplyr filter group_by summarize mutate n
 #' @importFrom rlang expr sym
@@ -20,7 +21,7 @@ summarize_wmr_dge_with_replicates <- function(df,
                                               group1_name = "Group1", # Control
                                               group2_name = "Group2", # Experimental
                                               log2FC_dge,
-                                              log2fc_wmr = "median_diff",
+                                              diff_wmr = "median_diff",
                                               dge_sig = "dge_sig",
                                               wmr_sig = "wmr_sig") {
 

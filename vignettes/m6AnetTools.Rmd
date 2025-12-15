@@ -674,7 +674,7 @@ After integrating these results with differential gene expression (DGE) statisti
 
 **Input Requirements**
 
-The input data frame must include the output from the `log2fc_weighted_mod_ratio()` with the m6A transcript information, the regional summaries, the log2fc_weighted_mod_ratio, and Deseq 
+The input data frame must include the merged output from the `weighted_mod_ratio_and_DGE(input_type = "log2fc_wmr")` with the m6A transcript information, the regional summaries, the log2fc_weighted_mod_ratio, and Deseq output.
 
 - A gene‐level log2FC column from DESeq2 or another DGE tool
 - A log2FC (weighted mod ratio) column from log2fc_weighted_mod_ratio()
@@ -735,21 +735,50 @@ head(summary_wmr_dge$region_summary_all)
 
 ### With Replicates
 
-The function `summarize_wmr_dge_replicates()` takes the merged output from `weighted_mod_ratio_and_DGE()` and assigns each each into one of 6 groups:
+**Input Requirements**
 
-1. SigHypermethylated in Condition 1, Upregulated in Condition 1
-2. Hypermethylated in Condition 2, Upregulated in Condition 2
-3. Hypermethylated in Condition 1, Upregulated in Condition 2
-4. Hypermethylated in Condition 2, Upregulated in Condition 1
-5. Hypermethylated in Condition 1, No significant change in gene expression
-6. Hypermethylated in Condition 2, No significant change in gene expression
+The input data frame must include the output from the `log2fc_weighted_mod_ratio(input_type = "wmr_diff")` with:
+
+- the m6A transcript information (including biotype)
+- the median_diff column
+- log2FC column from DESeq
+- significance column from the differential test of weighted mod ratios (boolean)
+- significance column from DEseq (boolean)
+
+You must also provide the column names for: 
+
+- `log2FC_dge`: gene expression log2FC
+- `log2fc_wmr`: weighted modification ratio log2FC
+- `sig_col`: gene expression significance column (Default = `"significant"`)
+
+```{r summarize-diff-test-dge-input, eval = FALSE}
+# Run function
+summary_diff_test_wmr <- summarize_wmr_dge_with_replicates(
+  df = diff_test_dge,
+  group1_name = "Naive", # Control
+  group2_name = "IGF", # Experimental
+  log2FC_dge = "igf_vs_naive_log2FC",
+  diff_wmr = "median_diff",
+  dge_sig = "dge_sig",
+  wmr_sig = "wmr_sig"
+)
+```
+
+The function `summarize_wmr_dge_replicates()` takes the merged output from `weighted_mod_ratio_and_DGE()`. and assigns each each into one of 6 groups:
+
+1. Sig. Hypermethylated in Condition 2, Sig. Upregulated in Condition 2
+2. Sig. Hypermethylated in Condition 2, Sig. Upregulated in Condition 2
+3. Sig. Hypermethylated in Condition 1, Sig. Upregulated in Condition 2
+4. Sig. Hypermethylated in Condition 2, Sig. Upregulated in Condition 1
+5. Hypermethylated in Condition 1 (but not sig.), No significant change in gene expression
+6. Hypermethylated in Condition 2 (but not sig.), No significant change in gene expression
 
 For each category, it returns:
 
 1. Filtered transcript list
 2. Biotype summary: Number and frequency of each gene biotype
-3. Region summary: Counts of sites in 5’UTR, CDS, 3’UTR, and total sites for each group
-# Combined Functions (Part 1 & 2)
+
+# Combined Functions (Part 1 & 2)s
 
 
 
