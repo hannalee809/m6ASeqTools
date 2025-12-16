@@ -406,8 +406,8 @@ These subsets are intended for demonstration purposes and can be loaded with sys
 
 ```{r load-annotation-file }
 # File paths
-rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6AnetTools")
-snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6AnetTools")
+rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6ASeqTools")
+snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6ASeqTools")
 
 # Load data
 rbp_df <- readr::read_tsv(rbp_file, col_names = F)
@@ -415,30 +415,35 @@ snp_df <- readr::read_tsv(snp_file, col_names = F)
 
 # set columns
 colnames(rbp_df) <- c(
-  "chr",        # chromosome
-  "start",        # start position (0-based)
-  "end",          # end position
-  "peak_id",
-  "strand",       # +/-
-  "RBP_name",          # RBP name
-  "experiment_method",  # Measure of enrichment for the region
-  "sample",       # pvalue
-  "accession_of_raw_data",    # accession number
-  "conf_score"         # confidence score
+  "chr",                   # Chromosome of the RBP binding site
+  "start",                 # Start position (0-based)
+  "end",                   # End position
+  "peak_id",               # Unique identifier for the peak
+  "strand",                # Strand of the peak (+ or -)
+  "RBP_name",              # Name of the RNA-binding protein
+  "experiment_method",     # Method used to detect the peak (e.g., CLIP-seq, PIP-seq)
+  "sample",                # Sample or condition in which the peak was observed
+  "accession_of_raw_data", # Accession number for the raw experiment data
+  "conf_score"             # Confidence score or enrichment measure for the peak
 )
 
 colnames(snp_df) <- c(
-  
-  
-  
-  
-  
-  
+  "chr",                  # Chromosome of the SNP
+  "start",                # Start position (0-based)
+  "end",                  # End position (1-based; SNP occupies 1 bp)
+  "snp_id",               # Unique SNP identifier
+  "variation",            # Allele variation (e.g., A>G)
+  "strand",               # Strand information (usually "*" for SNPs)
+  "clinical_significance",# Clinical annotation of the SNP (e.g., benign, pathogenic)
+  "function_class",       # Functional classification (e.g., exonic, intronic)
+  "gene"                  # Associated gene symbol or ID
 )
 
+head(rbp_df)
+head(snp_df)
 ```
 
-
+Users can then run `annotate_m6a()` using these small datasets to quickly explore the workflow before applying the pipeline to their own full-size datasets.
 
 # Comparative Analysis
 
