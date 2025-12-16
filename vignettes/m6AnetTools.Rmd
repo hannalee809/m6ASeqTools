@@ -395,6 +395,51 @@ caption = "First 6 rows of summarized annotated m6A sites") %>%
 
 Both output dataframes include a reference to the original m6A sites. In `overlap_df`, the first column `m6a_index` directly corresponds to the m6A site identifier from the input BED file, providing a one-to-one mapping for each overlap with RBPs. In `annotated_m6A_df`, the first column is a `row_id` that references the row of the original m6A dataframe. This allows users to easily merge the summarized annotation back with their original m6A dataset for downstream analyses. Essentially, `overlap_df` gives a detailed, long-format view of individual overlaps, while `annotated_m6A_df` provides a compact summary with a direct link to the original m6A sites.
 
+## Usage of built-in example external annotations
+
+We provide pre-processed example datasets in the `extdata/` folder to allow users to explore the annotation functions without needing large external files. These include:
+
+- Human dbSNP subset: a small set of SNPs mapped to transcripts, including position, gene, and functional annotation.
+- Human RBP subset: a curated subset of RNA-binding protein binding sites with genomic coordinates and experimental metadata.
+
+These subsets are intended for demonstration purposes and can be loaded with system.file() for use in example workflows. For instance:
+
+```{r load-annotation-file }
+# File paths
+rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6AnetTools")
+snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6AnetTools")
+
+# Load data
+rbp_df <- readr::read_tsv(rbp_file, col_names = F)
+snp_df <- readr::read_tsv(snp_file, col_names = F)
+
+# set columns
+colnames(rbp_df) <- c(
+  "chr",        # chromosome
+  "start",        # start position (0-based)
+  "end",          # end position
+  "peak_id",
+  "strand",       # +/-
+  "RBP_name",          # RBP name
+  "experiment_method",  # Measure of enrichment for the region
+  "sample",       # pvalue
+  "accession_of_raw_data",    # accession number
+  "conf_score"         # confidence score
+)
+
+colnames(snp_df) <- c(
+  
+  
+  
+  
+  
+  
+)
+
+```
+
+
+
 # Comparative Analysis
 
 Because m6Anet outputs predictions for individual samples, this package adds tools for comparing m6A patterns across conditions. The main capabilities include:
