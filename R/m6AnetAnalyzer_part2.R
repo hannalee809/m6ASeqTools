@@ -25,7 +25,7 @@
 #' @return Writes several CSV and PDF files to the output directory and returns
 #'   invisibly
 #' @export
-m6a_seq_part2 <- function(vec_list,
+m6AnetAnalyzer_part2 <- function(vec_list = NULL,
                         g1_df,
                         g2_df,
                         group1_name = "Group1",
@@ -48,6 +48,7 @@ m6a_seq_part2 <- function(vec_list,
 
   # Optional: Compare m6A distributions
   if (!is.null(vec_list)) {
+    print("Running comparison...")
     comparison <- compare_m6a_distribution(vec_list)
     new_compare <- lapply(comparison, function(x) {
       length(x) <- max(lengths(comparison))
@@ -57,15 +58,17 @@ m6a_seq_part2 <- function(vec_list,
   }
 
   # 2. Calculate log2FC of weighted mod ratio
+  print("Calculating log2 of WMR...")
   log2fc_df <- log2fc_weighted_mod_ratio(g1_df, g2_df, group1_name, group2_name)
   write.csv(log2fc_df, "log2fc_weighted_mod_ratio.csv", row.names = FALSE)
 
   # 3. Merge with DGE and plot
+  print("Integrating log2 WMR and DESeq")
   wmr <- weighted_mod_ratio_and_DGE(
-    log2df = log2fc_df,
+    wmr_df = log2fc_df,
     deseq = deseq,
     input_type = "log2fc_wmr",
-    gene_col = gene_col,
+    deseq_gene_col = gene_col,
     log2fc_col = log2fc_col,
     padj_col = padj_col,
     group1_name = group1_name,
@@ -78,13 +81,14 @@ m6a_seq_part2 <- function(vec_list,
 
   assign("log_column", paste0(group1_name, "_vs_", group2_name, "_log2FC"),envir=.GlobalEnv)
   assign("log_wmr","log2fc_weighted_mod_ratio",envir=.GlobalEnv)
-  assign("sig_column","significant",envir=.GlobalEnv)
+  assign("sig_column","dge_sig",envir=.GlobalEnv)
 
+  print("Summarizing Transcript and Biotype Clusters...")
   sum_wmr_dge <- summarize_wmr_dge_no_replicates(
       df = wmr$data,
       group1_name = group1_name,
       group2_name = group2_name,
-      log2FC_dge = log_column,
+      log2FC_dge = log2fc_col,
       log2fc_wmr = log_wmr,
       sig_col = sig_column,
       combine = TRUE
@@ -95,7 +99,7 @@ m6a_seq_part2 <- function(vec_list,
   write.csv(sum_wmr_dge$region_summary_all, "summarized_weighted_mod_ratio_and_DGE_region_summary.csv", row.names = FALSE)
 
   # Save group-level cluster breakdown
-  capture.output(str(sum_wmr_dge$groups), file = "summarized_weighted_mod_ratio_and_DGE_groups.txt")
-
+  #capture.output(str(sum_wmr_dge$groups), file = "summarized_weighted_mod_ratio_and_DGE_groups.txt")
+  print("Pipeline finished.")
   invisible(NULL)
 }

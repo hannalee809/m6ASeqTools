@@ -23,7 +23,7 @@
 #' plot <- plot_rel_positions(m6A_rel_tx_regions, "Sample A")
 #' ggsave("m6a_tx_regions_for_SampleA.pdf", plot)
 
-plot_rel_positions <- function(df, label = "") {
+plot_relative_positions <- function(df, label = "") {
   # Combine relative positions
   rel_positions <- c(
     df$rel_5utr[df$rel_5utr > 0],

@@ -8,7 +8,7 @@ m6AnetAnalyzer_part1(
   m6Aout,
   gtf_path,
   output_directory,
-  mod_ratio_df,
+  name,
   probability = 0.9
 )
 }
@@ -19,7 +19,7 @@ m6AnetAnalyzer_part1(
 
 \item{output_directory}{Path where outputs will be saved}
 
-\item{mod_ratio_df}{A string identifier used to name output files and the resulting object}
+\item{name}{A string identifier used to name output files and the resulting object}
 
 \item{probability}{Numeric threshold for high-confidence modification sites (default = 0.9)}
 }

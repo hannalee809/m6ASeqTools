@@ -44,7 +44,8 @@ BiocManager::install(c(
     "GenomicFeatures",
     "GenomicRanges",
     "IRanges",
-    "S4Vectors"
+    "S4Vectors",
+    "txdbmaker"
 ))
 
 # Install CRAN dependencies
@@ -133,7 +134,7 @@ This function applies a user-defined threshold (default = 0.9) and returns the f
 
 ```{r filter-m6a, eval = FALSE}
 filtered_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
-                                       probablity_modified=0.9)
+                                       prob_modified =0.9)
 ```
 
 ## Transcript Region Analysis
@@ -505,7 +506,7 @@ common_unique_genes <- compare_m6a_distribution(gene_list)
 # Distribution values
 attr(common_unique_genes, "summary")
 
-# Show common sites
+# Show common genes
 common_unique_genes$common_all
 ```
 
@@ -898,9 +899,9 @@ The function writes multiple files to output_directory, including:
 ```{r m6a_part1, eval=FALSE}
 m6AnetAnalyzer_part1(
   m6Aout = data.site_proba,
-  gtf_path = "gencode.v44.annotation.gtf",
+  gtf_path = "path/to/gtf",
   output_directory = "m6AnetAnalyzer_output",
-  mod_ratio_df = "Naive_Rep1",
+  name = "Naive_Rep1",
   probability = 0.9
 )
 ```
@@ -966,15 +967,17 @@ All results are written to output_dir, including:
 ```{r m6a-seq-part2, eval=FALSE}
 m6AnetAnalyzer_part2(
   vec_list = NULL,
-  g1_df = weighted_mod_ratio_Naive,
-  g2_df = weighted_mod_ratio_IGF2BP2_KD,
+  g1_df = naive_gli36_cells_wmr,
+  g2_df = igf_gli36_cells_wmr,
   group1_name = "Naive",
   group2_name = "IGF2BP2_KD",
-  deseq = deseq_results,
+  deseq = igf_vs_naive_DGE_filt,
   gene_col = "ensembl_gene_id",
-  log2fc_col = "log2FoldChange",
-  padj_col = "padj",
+  log2fc_col = "igf_vs_naive_log2FC",
+  padj_col = "pvalue_igf_vs_naive",
   output_dir = "m6AnetAnalyzer_Part2"
 )
+
+
 ```
 
