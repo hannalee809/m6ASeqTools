@@ -25,7 +25,7 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
 Depends: 
     R (>= 3.5)
 LazyData: true
