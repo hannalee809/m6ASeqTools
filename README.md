@@ -29,7 +29,8 @@ BiocManager::install(c(
     "GenomicFeatures",
     "GenomicRanges",
     "IRanges",
-    "S4Vectors"
+    "S4Vectors",
+    "txdbmaker"
 ))
 
 # Install CRAN dependencies
