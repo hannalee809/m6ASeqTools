@@ -21,7 +21,8 @@ Imports:
     S4Vectors,
     methods,
     tidyr,
-    magrittr
+    magrittr,
+    txdbmaker
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
