@@ -14,7 +14,7 @@
 #' @importFrom dplyr filter group_by summarize mutate n
 #' @importFrom rlang expr sym
 #'
-#' @return A list containing filtered data frames and summaries
+#' @return A list containing filtered data frame and the biotype summary for all clusters
 #' @export
 
 summarize_wmr_dge_with_replicates <- function(df,
@@ -32,6 +32,7 @@ summarize_wmr_dge_with_replicates <- function(df,
   wmr_sig <- rlang::sym(wmr_sig)
 
   group_list <- list()
+  biotype_summary_all <- list()  # to store combined summaries
 
   # Define filtering rules as expressions
   filters <- list(
@@ -40,23 +41,33 @@ summarize_wmr_dge_with_replicates <- function(df,
     sig_upreg_sig_hyperm6A_group1        = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!diff_wmr) < 0),
     sig_upreg_group1_sig_hyperm6a_group2 = rlang::expr((!!dge_sig) == TRUE  & (!!wmr_sig) == TRUE & (!!log2FC_dge) < 0 & (!!diff_wmr) > 0),
     noDGE_not_sig_hyperm6A_group2        = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!diff_wmr) > 0),
-    noDGE_not_sig_hyperm6A_group1       = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!diff_wmr) < 0)
+    noDGE_not_sig_hyperm6A_group1        = rlang::expr((!!dge_sig) == FALSE & (!!wmr_sig) == FALSE & (!!diff_wmr) < 0)
   )
 
   for (name in names(filters)) {
     group_df <- dplyr::filter(df, !!filters[[name]])
 
-    # Biotype summary
+    # Biotype summary for this group
     biotype_summary <- group_df %>%
       dplyr::group_by(gene_biotype) %>%
       dplyr::summarize(count = dplyr::n(), .groups = "drop") %>%
       dplyr::mutate(frequency = count / sum(count), group = name)
 
+    # Add to combined summary list
+    biotype_summary_all[[name]] <- biotype_summary
+
+    # Keep individual group data
     group_list[[name]] <- list(
       data = group_df,
       biotype_summary = biotype_summary
     )
   }
 
-  return(group_list)
+  # Bind all biotype summaries into one data frame
+  biotype_summary_all_df <- dplyr::bind_rows(biotype_summary_all)
+
+  return(list(
+    groups = group_list,
+    biotype_summary_all = biotype_summary_all_df
+  ))
 }

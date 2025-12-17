@@ -12,7 +12,7 @@
 #' @return Writes multiple output files (CSV, PDF, HTML) to `output_directory` and assigns
 #'         the weighted modification ratio dataframe to the global environment
 #' @export
-m6A_seq_part1 <- function(m6Aout,
+m6AnetAnalyzer_part1 <- function(m6Aout,
                     gtf_path,
                     output_directory,
                     mod_ratio_df,

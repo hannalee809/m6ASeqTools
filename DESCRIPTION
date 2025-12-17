@@ -1,9 +1,9 @@
-Package: m6ASeqTools
-Title: What the Package Does (One Line, Title Case)
+Package: m6AnetAnalyzer
+Title: Downstream Analysis Tools for m6Anet Output
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Hanna", "Lee", , "hannalee809@gmail.com", role = c("aut", "cre"))
+Description: Provides tools for downstream analysis of m6Anet output from Nanopore direct RNA sequencing experiments. The package supports quality control, transcript-level summarization of m6A methylation using weighted modification ratios, integration with gene expression data, and comparative analyses across experimental conditions. Functions are designed to facilitate interpretation of m6A modification patterns without requiring extensive custom scripting.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

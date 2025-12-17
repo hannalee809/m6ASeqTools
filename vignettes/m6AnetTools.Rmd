@@ -7,6 +7,7 @@ output:
     toc: true
     toc_depth: 3
     toc_float: true
+    number_sections: true
     theme: flatly
 vignette: >
   %\VignetteIndexEntry{Introduction to m6ASeqTools}
@@ -51,6 +52,8 @@ devtools::install_github("hannalee809/m6ASeqTools")
 ```
 
 # Input Data
+
+**Input size considerations:** m6AnetTools does not impose hard-coded limits on input file size. Performance is primarily constrained by available system memory and the number of m6A sites analyzed. For large datasets, we recommend processing data on systems with sufficient memory.
 
 The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**. The columns include:
 

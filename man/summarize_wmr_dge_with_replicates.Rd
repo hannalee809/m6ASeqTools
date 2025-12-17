@@ -30,7 +30,7 @@ summarize_wmr_dge_with_replicates(
 \item{wmr_sig}{Column name for differential test significance boolean (e.g., adjusted p < 0.05)}
 }
 \value{
-A list containing filtered data frames and summaries
+A list containing filtered data frame and the biotype summary for all clusters
 }
 \description{
 This function groups transcripts into functional categories based on gene expression and m6A methylation changes,
