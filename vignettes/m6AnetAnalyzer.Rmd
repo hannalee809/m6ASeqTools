@@ -1,5 +1,5 @@
 ---
-title: "Introduction to m6ASeqTools"
+title: "Introduction to m6AnetAnalyzer"
 author: "Hanna Lee"
 date: "`r Sys.Date()`"
 output:
@@ -10,7 +10,7 @@ output:
     number_sections: true
     theme: flatly
 vignette: >
-  %\VignetteIndexEntry{Introduction to m6ASeqTools}
+  %\VignetteIndexEntry{Introduction to m6AnetAnalyzer}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,10 +25,10 @@ knitr::opts_chunk$set(
 ```
 
 # Introduction
-`m6ASeqTools` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
+`m6AnetAnalyzer` is an R package designed to streamline the post-processing and interpretation of site-level m6A predictions from m6Anet. It provides descriptive summaries of m6A distribution across transcripts, genes, biotypes, and transcript regions, and enables condition comparisons through a calculated weighted modification ratio. By integrating differential gene expression data, the package links methylation changes with expression differences, providing biotype-specific and region-specific insights into how m6A localization patterns relate to transcriptional regulation.
 
 # Installation
-`m6ASeqTools` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
+`m6AnetAnalyzer` can be installed on **Windows, macOS, and Linux**. It requires R (≥4.0).
 
 ```{r installation, eval=FALSE}
 # Install devtools if needed
@@ -47,15 +47,15 @@ BiocManager::install(c(
     "S4Vectors"
 ))
 
-# Install m6ASeqTools from GitHub
-devtools::install_github("hannalee809/m6ASeqTools")
+# Install m6AnetAnalyzer from GitHub
+devtools::install_github("hannalee809/m6AnetAnalyzer")
 ```
 
 # Input Data
 
-**Input size considerations:** m6AnetTools does not impose hard-coded limits on input file size. Performance is primarily constrained by available system memory and the number of m6A sites analyzed. For large datasets, we recommend processing data on systems with sufficient memory.
+**Input size considerations:** m6AnetAnalyzer does not impose hard-coded limits on input file size. Performance is primarily constrained by available system memory and the number of m6A sites analyzed. For large datasets, we recommend processing data on systems with sufficient memory.
 
-The first step in using **m6ASeqTools** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**. The columns include:
+The first step in using **m6AnetAnalyzer** is importing the `data.site_proba.csv` file, which represents the final output from **m6Anet**. The columns include:
 
 1. **m6A site information**
 
@@ -88,7 +88,7 @@ These example datasets allow you to explore the package workflow without needing
 
 ```{r import-data, echo=FALSE}
 library(kableExtra)
-library(m6ASeqTools)
+library(m6AnetAnalyzer)
 ```
 
 ```{r example-data-load}
@@ -409,8 +409,8 @@ These subsets are intended for demonstration purposes and can be loaded with sys
 
 ```{r load-annotation-file }
 # File paths
-rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6ASeqTools")
-snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6ASeqTools")
+rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6AnetAnalyzer")
+snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6AnetAnalyzer")
 
 # Load data
 rbp_df <- readr::read_tsv(rbp_file, col_names = F)
@@ -848,13 +848,13 @@ caption = "Example biotype summary from run_wmr_differential_test()"
 
 ## Part 1: m6Anet Post-Processing
 
-The function `m6A_seq_part1()` automates the core preprocessing and annotation steps of the m6ASeqTools pipeline, starting from m6Anet site-level predictions and ending with weighted modification ratios per transcript. This function is intended as the first step in downstream differential methylation analyses.
+The function `m6AnetAnalyzer_part1()` automates the core preprocessing and annotation steps of the m6AnetAnalyzer pipeline, starting from m6Anet site-level predictions and ending with weighted modification ratios per transcript. This function is intended as the first step in downstream differential methylation analyses.
 
 It performs quality control, site filtering, transcript region annotation, chromosome localization, and weighted modification ratio (WMR) calculation in a single, reproducible workflow.
 
 **When to Use This Function**
 
-Use m6A_seq_part1() after running m6Anet and before any differential methylation or integration with gene expression analyses. The output of this function serves as the input for any further comparative analysis.
+Use m6AnetAnalyzer_part1() after running m6Anet and before any differential methylation or integration with gene expression analyses. The output of this function serves as the input for any further comparative analysis.
 
 **Inputs**
 
@@ -868,7 +868,7 @@ The function requires:
 
 What the Function Does
 
-m6A_seq_part1() executes the following steps automatically:
+m6AnetAnalyzer_part1() executes the following steps automatically:
 
 1. **Quality Control Summary** (`summarize_m6anet_output()`): Generates an HTML QC report summarizing m6Anet predictions.
 2. **High-Confidence Site Filtering** (`filter_m6a_sites()`): Filters m6A sites based on the specified modification probability threshold.
@@ -893,10 +893,10 @@ The function writes multiple files to output_directory, including:
 
 **Example Usage**
 ```{r m6a_part1, eval=FALSE}
-m6A_seq_part1(
+m6AnetAnalyzer_part1(
   m6Aout = data.site_proba,
   gtf_path = "gencode.v44.annotation.gtf",
-  output_directory = "m6ASeqTools_output",
+  output_directory = "m6AnetAnalyzer_output",
   mod_ratio_df = "Naive_Rep1",
   probability = 0.9
 )
@@ -904,13 +904,13 @@ m6A_seq_part1(
 
 ## Part 2: Differential m6A Methylation and Gene Expression Integration
 
-The function m6a_seq_part2() performs downstream comparative analysis of m6A methylation between two biological groups and integrates these results with differential gene expression (DGE) data. This function is designed to be run after completing Part 1 of the m6ASeqTools pipeline and is optimized for studies without biological replicates.
+The function m6AnetAnalyzer_part2() performs downstream comparative analysis of m6A methylation between two biological groups and integrates these results with differential gene expression (DGE) data. This function is designed to be run after completing Part 1 of the m6AnetAnalyzer pipeline and is optimized for studies without biological replicates.
 
 It calculates transcript-level methylation differences, integrates gene expression changes, generates visualization outputs, and summarizes biological patterns across functional clusters.
 
 **When to Use This Function**
 
-Use m6a_seq_part2() once you have:
+Use m6AnetAnalyzer_part2() once you have:
 
 - Transcript-level weighted modification ratios for two groups
 - Differential gene expression results (e.g., from DESeq2)
@@ -930,7 +930,7 @@ The function requires the following inputs:
 
 **Analysis Steps Performed**
 
-`m6a_seq_part2()` runs the following steps automatically:
+`m6AnetAnalyzer_part2()` runs the following steps automatically:
 
 1. **Optional m6A Distribution** Comparison (`compare_m6a_distribution()`): If vec_list is provided, the function compares global m6A distributions across groups and saves a summary table.
 
@@ -961,7 +961,7 @@ All results are written to output_dir, including:
 
 **Example Usage**
 ```{r m6a-seq-part2, eval=FALSE}
-m6a_seq_part2(
+m6AnetAnalyzer_part2(
   vec_list = NULL,
   g1_df = weighted_mod_ratio_Naive,
   g2_df = weighted_mod_ratio_IGF2BP2_KD,
@@ -971,7 +971,7 @@ m6a_seq_part2(
   gene_col = "ensembl_gene_id",
   log2fc_col = "log2FoldChange",
   padj_col = "padj",
-  output_dir = "m6ASeqTools_Part2"
+  output_dir = "m6AnetAnalyzer_Part2"
 )
 ```
 
