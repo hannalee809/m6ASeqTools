@@ -47,8 +47,11 @@ BiocManager::install(c(
     "S4Vectors"
 ))
 
+# Install CRAN dependencies
+install.packages(c("dplyr", "ggplot2", "tidyr", "magrittr", "kableExtra"))
+
 # Install m6AnetAnalyzer from GitHub
-devtools::install_github("hannalee809/m6AnetAnalyzer")
+devtools::install_github("hannalee809/m6AnetAnalyzer", build_vignettes = TRUE)
 ```
 
 # Input Data

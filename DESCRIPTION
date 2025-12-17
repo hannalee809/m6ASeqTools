@@ -23,9 +23,12 @@ Imports:
     tidyr,
     magrittr
 Suggests: 
-    testthat (>= 3.0.0)
+    knitr,
+    testthat (>= 3.0.0),
+    kableExtra,
+    rmarkdown
 Config/testthat/edition: 3
-VignetteBuilder: knitr, rmarkdown
+VignetteBuilder: knitr
 Depends: 
-    R (>= 3.5)
-LazyData: true
+    R (>= 4.0)
+LazyData: TRUE

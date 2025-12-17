@@ -18,9 +18,26 @@ Key features include:
 ## Installation
 
 ```r
-# Install directly from GitHub
+# Install devtools if needed
+install.packages("devtools")
 
-# install.packages("devtools")
+# Install Bioconductor dependencies
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c(
+    "AnnotationDbi",
+    "org.Hs.eg.db",
+    "GenomicFeatures",
+    "GenomicRanges",
+    "IRanges",
+    "S4Vectors"
+))
+
+# Install CRAN dependencies
+install.packages(c("dplyr", "ggplot2", "tidyr", "magrittr", "kableExtra"))
+
+# Install m6AnetAnalyzer from GitHub
 devtools::install_github("hannalee809/m6AnetAnalyzer", build_vignettes = TRUE)
 ```
 
