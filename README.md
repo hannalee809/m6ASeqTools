@@ -13,8 +13,6 @@ Key features include:
 - Integration with DESeq2 differential gene expression results
 - Export of genomic coordinates for IGV/UCSC visualization
 
----
-
 ## Installation
 
 ```r
@@ -42,7 +40,6 @@ devtools::install_github("hannalee809/m6AnetAnalyzer", build_vignettes = TRUE)
 ```
 
 Requires R ≥ 4.0. Available on Linux, macOS, and Windows.
----
 
 ## Input Requirements
 
@@ -56,8 +53,6 @@ m6ASeqTools is designed to work directly with m6Anet output and requires the fol
 
 The package was developed using RNA002 DRS datasets but is fully compatible with RNA004 data, as the m6Anet output format remains unchanged between versions.
 
----
-
 ## Typical Workflow
 
 1. Load m6Anet per-site probability output and compute QC and summary statistics
@@ -69,8 +64,6 @@ The package was developed using RNA002 DRS datasets but is fully compatible with
 4. (Optional) Integrate methylation results with gene expression and summarize transcript biotype and/or transcript region distributions
 
 5. (Optional) Visualize and m6A sites on IGV and incorporate external BED annotations
-
----
 
 ## Documentation
 
@@ -89,7 +82,6 @@ To view the vignette after installation:
 ```r
 browseVignettes("m6AnetAnalyzer")
 ```
----
 
 ## Contact
 
