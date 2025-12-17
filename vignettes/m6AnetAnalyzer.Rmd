@@ -92,10 +92,11 @@ These example datasets allow you to explore the package workflow without needing
 
 ```{r import-data, echo=FALSE}
 library(kableExtra)
-library(m6AnetAnalyzer)
 ```
 
 ```{r example-data-load}
+library(m6AnetAnalyzer)
+
 # Load the example dataset included in the package
 data("example_m6A_naive_gli36_cells")
 head(example_m6A_naive_gli36_cells)
