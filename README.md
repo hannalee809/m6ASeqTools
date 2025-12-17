@@ -21,7 +21,7 @@ Key features include:
 # Install directly from GitHub
 
 # install.packages("devtools")
-devtools::install_github("hannalee809/m6AnetAnalyzer")
+devtools::install_github("hannalee809/m6AnetAnalyzer", build_vignettes = TRUE)
 ```
 
 Requires R ≥ 4.0. Available on Linux, macOS, and Windows.
