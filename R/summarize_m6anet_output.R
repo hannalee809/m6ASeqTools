@@ -8,7 +8,7 @@
 #' @return Renders an HTML summary QC report.
 #' @export
 
-summarize_m6anet_output <- function(data.site_proba_df, output_file="m6anet_qc_report.html", output_dir = NULL) {
+summarize_m6anet_output <- function(data.site_proba_df, output_file="m6anet_qc_report.html", output_dir = getwd()) {
   rmarkdown::render(
     input = system.file("rmd", "m6anet_qc_template.Rmd", package = "m6AnetAnalyzer"),
     output_file = output_file,

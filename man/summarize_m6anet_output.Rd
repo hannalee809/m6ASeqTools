@@ -7,7 +7,7 @@
 summarize_m6anet_output(
   data.site_proba_df,
   output_file = "m6anet_qc_report.html",
-  output_dir = NULL
+  output_dir = getwd()
 )
 }
 \arguments{
