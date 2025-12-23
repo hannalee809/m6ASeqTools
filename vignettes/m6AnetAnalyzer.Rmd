@@ -92,6 +92,7 @@ These example datasets allow you to explore the package workflow without needing
 
 ```{r import-data, echo=FALSE}
 library(kableExtra)
+library(ggplot2)
 ```
 
 ```{r example-data-load}
@@ -100,6 +101,20 @@ library(m6AnetAnalyzer)
 # Load the example dataset included in the package
 data("example_m6A_naive_gli36_cells")
 head(example_m6A_naive_gli36_cells)
+```
+
+```{r,setup-output-dirs, include=FALSE}
+# Root output directory
+output_dir <- "vignette_outputs"
+
+# Define subdirectories
+dir_descriptive <- file.path(output_dir, "descriptive_statistics")
+dir_annotations <- file.path(output_dir, "external_annotations")
+dir_comparisons <- file.path(output_dir, "comparative_analysis")
+
+# Create directories if they don't exist
+dirs <- c(output_dir, dir_descriptive, dir_annotations, dir_comparisons)
+lapply(dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 ```
 
 # Descriptive Statistics
@@ -115,16 +130,16 @@ After importing the `data.site_proba.csv` file in the required format, you can g
 5. **Modified k-mer distribution:** Table and bar graph showing counts and frequencies of modified k-mers.
 6. **Transcript length distribution:** Table and density graph showing the lengths of modified transcripts, grouped into bins: 101–500 bp, 501–1000 bp, 1001–5000 bp, 5001–10000 bp, and >10000 bp.
 
-```{r summarize-m6anet-output, eval=FALSE}
+```{r summarize-m6anet-output, message=FALSE, warning = FALSE}
 # Generate the summary HTML report
 summarize_m6anet_output(
   example_m6A_naive_gli36_cells, 
-  output_file = "naive_summary_report.html"
-)
+  output_file = "naive_summary_report.html",
+  output_dir = dir_descriptive)
 ```
 
-```{r summary-plot, echo=FALSE, out.width="100%", out.height="800px"}
-knitr::include_graphics("naive_html_summary.png")
+```{r summary-plot, echo=FALSE, out.width="100%", out.height="500px"}
+knitr::include_graphics("naive_summary.png")
 ```
 
 ## Filter m6A Sites
@@ -133,9 +148,12 @@ This function applies a user-defined threshold (default = 0.9) and returns the f
 
 > **Important:** Use this filtered dataset from this point onward for downstream analyses.
 
-```{r filter-m6a, eval = FALSE}
+```{r filter-m6a}
 filtered_m6A_naive_gli36_cells <- filter_m6a_sites(example_m6A_naive_gli36_cells,
                                        prob_modified =0.9)
+
+# save output
+write.csv(filtered_m6A_naive_gli36_cells, file.path(dir_descriptive, "naive_filtered_m6A_sites.csv"))
 ```
 
 ## Transcript Region Analysis
@@ -151,65 +169,51 @@ This
 
 This workflow requires a GTF annotation file.
 
-```{r tx-regions, eval = FALSE}
+```{r tx-regions-annotations, eval = FALSE}
 # Path to GTF annotation file
 gtf_path <- "/path/to/gencode.v45.annotation.gtf"
 
 # Step 1: Extract transcript region lengths (5'UTR, CDS, 3'UTR)
-tx_df <- get_transcript_region_lengths(gtf_path)
+tx_annotations <- get_transcript_region_lengths(gtf_path)
+```
+
+```{r run-tx-ann, warning=FALSE}
+# Load in annotations
+data("tx_annotations")
+head(tx_annotations)
 
 # Step 2: Annotate each m6A site with its region and relative position
-filtered_m6A_naive_gli36_cells <-
+naive_m6A_with_tx_annotations <-
   map_relative_tx_regions_to_m6A(
     filtered_m6A_naive_gli36_cells,
-    tx_df
+    tx_annotations
   )
 
+head(naive_m6A_with_tx_annotations)
+
 # Step 3: Visualize distribution of m6A across transcript regions
-p <- plot_relative_positions(filtered_m6A_naive_gli36_cells, label = "naive") # add plot label if desired
+p <- plot_relative_positions(naive_m6A_with_tx_annotations, label = "naive") # add plot label if desired
+
+# Show plot
+p
+
+# Save output
+write.csv(naive_m6A_with_tx_annotations, file.path(dir_descriptive,"naive_m6A_with_tx_annotations.csv"))
+ggsave("naive_tx_density.pdf", p)
 ```
 
 The output includes the original m6A site information along with transcript-region annotations (5′UTR, CDS, 3′UTR). For each region, the table reports its length, start and end positions, the region in which the site falls, and the site’s relative position within that region. Some sites may not map to any transcript region (i.e., sites on non-coding transcripts with no annotated UTR/CDS structures). These sites are retained in the output, with `NA` values for the transcript-region fields.
 
-```{r tx-region-table, echo=FALSE}
-knitr::kable(
-data.frame(
-m6a_site_info... = c("..."),
-utr5_length = "159",
-utr3_length = "1457",
-cds_length_tx = "834",
-start_utr5 = "1",
-end_utr5 = "159",
-start_cds = "160",
-end_cds = "992",
-start_utr3 = "993",
-end_utr3 = "2449",
-isin_5utr = "0",
-isin_cds = "0",
-isin_3utr = "1",
-rel_5utr = "NA",
-rel_cds = "NA",
-rel_3utr = "0.78"
-),
-align="l"
-) %>% 
-  kable_styling(
-    font_size = 10,
-    full_width = FALSE
-  )
-```
-
-```{r tx-plot, echo=FALSE, out.width="80%", out.height="400px"}
-knitr::include_graphics("Transcript_Region_Density_naive.png")
-```
-
 ## Chromosomal Annotation
 This function assigns each m6A site to its chromosome using human gene annotations from org.Hs.eg.db. Provide the m6A dataframe and optionally specify whether the results should be saved as a CSV and whether a chromosomal distribution plot should be generated.
 
-```{r chr-dist, eval=FALSE}
-calculate_chromosome_location(filtered_m6A_naive_gli36_cells,
-                              output_csv=NULL, 
-                              output_plot="naive_chr_distribution.png")
+```{r chr-dist, message = FALSE, warning = FALSE}
+chr <- calculate_chromosome_location(filtered_m6A_naive_gli36_cells,
+                              output_csv=file.path(dir_descriptive,"chromosomal_distribution.csv"), 
+                              output_plot=file.path(dir_descriptive,"naive_chr_distribution.png"))
+
+# Show chromosome annotation
+head(chr)
 ```
 
 ```{r chr-plot, echo=FALSE, out.width="80%", out.height="400px"}
@@ -237,29 +241,11 @@ The function returns a dataframe containing one row per transcript with:
 - counts of sites in 5′UTR, CDS, and 3′UTR (if `tx_info` = TRUE)
 - the computed weighted modification ratio
 
-```{r calc-wmr, eval=FALSE}
-calculate_weighted_mod_ratio(filtered_m6A_naive_gli36_cells, mod_ratio_column = "mod_ratio")
-```
+```{r calc-wmr}
+naive_wmr <- calculate_weighted_mod_ratio(naive_m6A_with_tx_annotations, 
+                                          mod_ratio_column = "mod_ratio")
 
-```{r wmr-table, echo=FALSE}
-library(kableExtra)
-
-knitr::kable(
-  data.frame(
-    m6a_transcript_info... = c("...", "..."),
-    sum_mod = c("1.81", "1.79"),
-    n_sites = c("3", "3"),
-    sites_in_5utr = c("0", "0"),
-    sites_in_cds = c("0", "0"),
-    sites_in_3utr = c("3", "3"),
-    weighted_mod_ratio = c("0.00075", "0.00067")
-  ),
-  align = "l"
-) %>%
-  kable_styling(
-    font_size = 11,
-    full_width = FALSE
-  )
+head(naive_wmr)
 ```
 
 # Incorporating External Annotations
@@ -282,11 +268,12 @@ Inputs:
 - **output_bedgraph:** optional path to write the BedGraph file.
 
 ```{r bed-file, eval=FALSE}
+# Make sure to input the GTF path in order to evaluate! 
 create_bed_file(
   filtered_m6A_naive_gli36_cells,
   gtf_path,
-  output_bed = "path/to/ouput/bed",
-  output_bedgraph = "path/to/output/bedgraph"
+  output_bed = "example_m6A_naive_gli36.bed",
+  output_bedgraph = "example_m6A_naive_gli36.bedgraph"
 )
 ```
 
@@ -301,24 +288,12 @@ Outputs:
 2. bed_df: ready-to-visualize BED6 data frame.
 3. BED6 and BEDGRAPH files saved to user-provided path.
 
-
-```{r bed-format, echo=FALSE}
-knitr::kable(
-data.frame(
-chr = c("chr1", "chr1", "chr2"),
-start = c(10048291, 10599321, 20488511),
-end = c(10048292, 10599322, 20488512),
-name = c("ENST00000335137_1285",
-"ENST00000284987_452",
-"ENST00000491231_97"),
-score = c(820, 640, 995),
-strand = c("+", "-", "+")
-),
-caption = "Example BED6 output generated by create_bed_file()"
-)
+```{r bed-format}
+data("example_m6A_naive_gli36_BED")
+head(example_m6A_naive_gli36_BED)
 ```
 
-This figure shows an example of m6A visualization in IGV using the generated bedGraph file. m6A levels are represented by the score track. The view is zoomed into chromosome 17, where the pink signal reflects m6A levels and the blue track shows the gene annotation.
+This figure shows an example of m6A visualization in IGV. m6A levels are represented by the score track. The view is zoomed into chromosome 17, where the pink signal reflects m6A levels and the blue track shows the gene annotation.
  
 ```{r igv-plot, echo=FALSE, out.width="100%", out.height="200px"}
 knitr::include_graphics("naive_m6a_igv_chr17.png")
@@ -351,18 +326,9 @@ The function returns two data frames:
     - Overlapping_Features: semicolon-separated list of feature names
     - Feature_Count: number of unique overlapping features
     
-```{r annotate-m6A-example, message=FALSE, warning=FALSE}
-# Step 1: Load example BED file for Naive Gli36
-data("example_m6A_naive_gli36_BED")
-```
-
-```{r show-naive-bed, echo=FALSE}
-knitr::kable(head(example_m6A_naive_gli36_BED), 
-             caption = "First 6 rows of example m6A BED file")
-```
 
 ```{r load-example-rbp}
-# Step 2: Load example RBP annotation
+# Load example RBP annotation
 data("example_rbp_annotation")
 
 # Define columns
@@ -371,13 +337,11 @@ colnames(example_rbp_annotation) <- c(
 "RBP_name", "experiment_method", "sample",
 "accession_of_raw_data", "conf_score"
 )
+
+# Show first few lines
+head(example_rbp_annotation)
 ```
 
-```{r show-rbp-bed, echo=FALSE}
-knitr::kable(head(example_rbp_annotation),
-caption = "First 6 rows of example RBP annotation") %>%
-  kableExtra::kable_styling(font_size = 11)
-```
 
 ```{r run-annotation,message=FALSE, warning=FALSE}
 # Step 3: Run annotation function
@@ -386,19 +350,12 @@ example_m6A_naive_gli36_BED,
 example_rbp_annotation,
 feature_col = "RBP_name"
 )
-```
 
-Here are the outputs of the function:
-```{r annotation-output01, echo=FALSE}
-knitr::kable(head(annotated_example_naive_with_rbp$overlap_df),
-caption = "First 6 rows of overlap between m6A sites and RBP annotations") %>%
-  kableExtra::kable_styling(font_size = 11)
-```
+# Show output #1: dataframe with the overlapping features and m6A row index
+head(annotated_example_naive_with_rbp$overlap_df)
 
-```{r annotation-output02, echo=FALSE}
-knitr::kable(head(annotated_example_naive_with_rbp$annotated_m6A_df),
-caption = "First 6 rows of summarized annotated m6A sites") %>%
-  kableExtra::kable_styling(font_size = 11)
+# Show output #2: m6A dataframe with the summarized overlapping features
+head(annotated_example_naive_with_rbp$annotated_m6A_df)
 ```
 
 Both output dataframes include a reference to the original m6A sites. In `overlap_df`, the first column `m6a_index` directly corresponds to the m6A site identifier from the input BED file, providing a one-to-one mapping for each overlap with RBPs. In `annotated_m6A_df`, the first column is a `row_id` that references the row of the original m6A dataframe. This allows users to easily merge the summarized annotation back with their original m6A dataset for downstream analyses. Essentially, `overlap_df` gives a detailed, long-format view of individual overlaps, while `annotated_m6A_df` provides a compact summary with a direct link to the original m6A sites.
@@ -412,7 +369,7 @@ We provide pre-processed example datasets in the `extdata/` folder to allow user
 
 These subsets are intended for demonstration purposes and can be loaded with system.file() for use in example workflows. For instance:
 
-```{r load-annotation-file }
+```{r load-annotation-file}
 # File paths
 rbp_file <- system.file("extdata", "RBP_POSTAR_human_subset.bed", package = "m6AnetAnalyzer")
 snp_file <- system.file("extdata", "dbSNP_human_subset.bed", package = "m6AnetAnalyzer")
@@ -531,16 +488,15 @@ This function returns a merged dataframe containing:
     - Negative values indicate higher methylation in condition 2
 
 ```{r wmr}
-# Load example dataframes with the weighted modification ratio calculations
-data("naive_gli36_cells_wmr")
-data("igf_gli36_cells_wmr")
+# Load IGF dataframes with the weighted modification ratio calculations
+data("igf_wmr")
 
-# Show first few lines
-head(naive_gli36_cells_wmr)
+# Head naive wmr dataframe 
+head(naive_wmr)
 
 # Run function
-logfc_wmr_igf_vs_naive <- log2fc_weighted_mod_ratio(group1_df = igf_gli36_cells_wmr, # IGF set as condition 1
-                                                    group2_df = naive_gli36_cells_wmr, # Naive set as condition 2
+logfc_wmr_igf_vs_naive <- log2fc_weighted_mod_ratio(group1_df = naive_wmr, # Naive set as condition 1
+                                                    group2_df = igf_wmr, # IGF set as condition 2
                                                     group1_name = "NAIVE",
                                                     group2_name = "IGF")
 
@@ -575,17 +531,43 @@ Each data frame must include these columns:
 - `transcript_length`
 - `weighted_mod_ratio`
 
-```{r run_differential_test, eval=F}
-# Define lists
-naive_list <- list(naive1_wmr, naive2_wmr, naive3_wmr)
-igf_list <- list(igf1_wmr, igf2_wmr, igf3_wmr)
+```{r simulate-replicates}
+# Create replicate data for example usage
+simulate_wmr_replicate <- function(
+  wmr_df,
+  noise_sd = 0.1,
+  seed = NULL
+) {
+  if (!is.null(seed)) set.seed(seed)
 
-# Function call
-results <- run_wmr_differential_test(
-condition1_list = naive_list,
-condition2_list = igf_list,
-condition1_name = "naive",
-condition2_name = "IGF"
+  wmr_df %>%
+    dplyr::mutate(
+      sum_mod = pmax(
+        0,
+        sum_mod + rnorm(n(), mean = 0, sd = noise_sd)
+      ),
+      weighted_mod_ratio = sum_mod / transcript_length
+    )
+}
+# IGF condition (3 replicates)
+igf_rep1 <- igf_wmr
+igf_rep2 <- simulate_wmr_replicate(igf_wmr, seed = 1)
+igf_rep3 <- simulate_wmr_replicate(igf_wmr, seed = 2)
+
+# Naive condition (3 replicates)
+naive_rep1 <- naive_wmr
+naive_rep2 <- simulate_wmr_replicate(naive_wmr, seed = 3)
+naive_rep3 <- simulate_wmr_replicate(naive_wmr, seed = 4)
+```
+
+> **Note on replicate data:** To demonstrate replicate-aware differential methylation testing while keeping the package lightweight, replicate datasets shown in this vignette are generated by adding controlled noise to example m6Anet outputs. This approach preserves realistic data structure and variability without distributing large raw sequencing files. Users are expected to supply true biological replicates for real analyses.
+
+```{r run_differential_test}
+diff_results <- run_wmr_differential_test(
+  condition1 = list(naive_rep1, naive_rep2, naive_rep3),
+  condition2 = list(igf_rep1, igf_rep2, igf_rep3),
+  condition1_name = "Naive",
+  condition2_name = "IGF"
 )
 ```
 
@@ -598,25 +580,7 @@ The output of this function is a data frame containing one row per transcript wi
 - `p_value` from Wilcoxon test. Low `p_value` indicates statistical significance.
 
 ```{r wilcox_output, echo=FALSE}
-knitr::kable(
-data.frame(
-ensembl_transcript_name = c("JKAMP-213", "PHPT1-204"),
-ensembl_transcript_id = c("ENST00000602482.5", "ENST00000463215.1"),
-ensembl_gene_id = c("ENSG00000050130.18", "ENSG00000054148.18"),
-ensembl_gene_name = c("JKAMP", "PHPT1"),
-gene_biotype = c("retained_intron", "protein_coding_CDS_not_defined"),
-transcript_length = c("2302", "627"),
-median_wmr_condition1 = c("0.0011716045", "0.0001362911"),
-median_wmr_condition2 = c("0", "0"),
-median_diff = c("-1.171604e-03", "-1.362911e-04"),
-p_value = c("0.0765225", "0.0765225")),
-align="l", 
-caption = "Example output from run_wmr_differential_test()"
-) %>% 
-  kable_styling(
-    font_size = 10,
-    full_width = FALSE
-  )
+head(diff_results)
 ```
 
 ## Methylation and Gene Expression
@@ -648,14 +612,14 @@ This function can handle **two types of WMR inputs**:
 head(logfc_wmr_igf_vs_naive)
 
 # Load DESeq output
-data("igf_vs_naive_DGE_filt")
-head(igf_vs_naive_DGE_filt)
+data("IGF_vs_Naive_deseq")
+head(IGF_vs_Naive_deseq)
 
 # Run function
 log2wmr_dge_igf_naive_results <-
   weighted_mod_ratio_and_DGE(
     wmr_df = logfc_wmr_igf_vs_naive,
-    deseq = igf_vs_naive_DGE_filt,
+    deseq = IGF_vs_Naive_deseq,
     input_type = "log2fc_wmr",
     deseq_gene_col = "ensembl_gene_id_version",
     log2fc_col = "igf_vs_naive_log2FC",
@@ -702,12 +666,13 @@ Points are colored by significance:
 
 This allows you to visualize how changes in methylation correspond to gene expression, highlighting transcripts with significant differences in either or both measures.
 
-```{r wmr-dge-with-replicates, eval=FALSE}
+
+```{r wmr-dge-with-replicates}
 diff_test_dge <-
   weighted_mod_ratio_and_DGE(
     # results from differential test
-    wmr_df = diff_test_igf_naive_filt,
-    deseq = igf_vs_naive_DGE,
+    wmr_df = diff_results,
+    deseq = IGF_vs_Naive_deseq,
     # set to wmr_diff
     input_type = "wmr_diff",
     # set cut off for significance if wanted
@@ -720,9 +685,14 @@ diff_test_dge <-
   )
 ```
 
-```{r wmr-dge-plot, echo=FALSE, out.width="100%", out.height="400px", fig.cap="Differential expression plot"}
-knitr::include_graphics("diff_test_dge_plot.pdf")
+```{r wmr-dge-replicate-plot-and-outpu}
+# Show output plot
+diff_test_dge$plot
+
+# Show head of output dataframe
+head(diff_test_dge$data)
 ```
+
 
 ## Summarize Methylation and Expression
 
@@ -809,10 +779,10 @@ You must also provide the column names for:
 - `log2fc_wmr`: weighted modification ratio log2FC
 - `sig_col`: gene expression significance column (Default = `"significant"`)
 
-```{r summarize-diff-test-dge-input, eval = FALSE}
+```{r summarize-diff-test-dge-input}
 # Run function
 summary_diff_test_wmr <- summarize_wmr_dge_with_replicates(
-  df = diff_test_dge,
+  df = diff_test_dge$data,
   group1_name = "Naive", # Control
   group2_name = "IGF", # Experimental
   log2FC_dge = "igf_vs_naive_log2FC",
@@ -836,16 +806,9 @@ For each category, it returns:
 1. Filtered transcript list
 2. Biotype summary: Number and frequency of each gene biotype
 
-```{r summarize-diff-test-dge-output, echo = FALSE}
-knitr::kable(
-data.frame(
-gene_biotype = c("protein_coding", "retained_intron"),
-count = c("4", "21"),
-frequency = c("0.0112540193", "0.0862808146"),
-group = c("noDGE_not_sig_hyperm6A_group1", "noDGE_not_sig_hyperm6A_group1")),
-align="l", 
-caption = "Example biotype summary from run_wmr_differential_test()"
-)
+```{r summarize-diff-test-dge-output}
+# Show biotype summary 
+head(summary_diff_test_wmr$biotype_summary_all)
 ```
 
 
@@ -901,7 +864,7 @@ The function writes multiple files to output_directory, including:
 m6AnetAnalyzer_part1(
   m6Aout = data.site_proba,
   gtf_path = "path/to/gtf",
-  output_directory = "m6AnetAnalyzer_output",
+  output_directory = "path/to/output",
   name = "Naive_Rep1",
   probability = 0.9
 )
@@ -965,20 +928,18 @@ All results are written to output_dir, including:
 - summarized_weighted_mod_ratio_and_DGE_groups.txt
 
 **Example Usage**
-```{r m6a-seq-part2, eval=FALSE}
+```{r m6a-seq-part2}
 m6AnetAnalyzer_part2(
   vec_list = NULL,
-  g1_df = naive_gli36_cells_wmr,
-  g2_df = igf_gli36_cells_wmr,
+  g1_df = naive_wmr,
+  g2_df = igf_wmr,
   group1_name = "Naive",
   group2_name = "IGF2BP2_KD",
-  deseq = igf_vs_naive_DGE_filt,
-  gene_col = "ensembl_gene_id",
+  deseq = IGF_vs_Naive_deseq,
+  gene_col = "ensembl_gene_id_version",
   log2fc_col = "igf_vs_naive_log2FC",
   padj_col = "pvalue_igf_vs_naive",
-  output_dir = "m6AnetAnalyzer_Part2"
+  output_dir = file.path(output_dir, "m6AnetAnalyzer_Part2")
 )
-
-
 ```
 
